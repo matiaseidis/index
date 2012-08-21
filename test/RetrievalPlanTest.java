@@ -13,14 +13,11 @@ import models.UserChunks;
 import models.Video;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import plan.RetrievalPlanCreator;
 import play.mvc.Http.Response;
-import play.test.Fixtures;
-import play.test.FunctionalTest;
-import controllers.VideoService;
+import controllers.ChunkService;
 
 
 public class RetrievalPlanTest extends BaseFunctionalTest{
@@ -94,8 +91,6 @@ public class RetrievalPlanTest extends BaseFunctionalTest{
 		Assert.assertNotNull(userCachoDelUser2);
 		Assert.assertNotNull(userCachoDelUser3);
 		Assert.assertNotNull(userCachoDelUser4);
-
-
 
 		Assert.assertEquals(primerCachoDelUser1.getUser().email, chunkSize*100, primerCachoDelUser1.getCacho().lenght);
 		Assert.assertEquals(userCachoDelUser2.getUser().email, chunkSize*100, userCachoDelUser2.getCacho().lenght);
@@ -286,7 +281,7 @@ public class RetrievalPlanTest extends BaseFunctionalTest{
 		params.put("userId",user.email);
 		params.put("chunks",chunksForRegisterByUser);
 
-		callService("/videoService/registerChunks", params);
+		callService("/chunkService/registerChunks", params);
 		
 		video.refresh();
 		
@@ -312,7 +307,7 @@ public class RetrievalPlanTest extends BaseFunctionalTest{
 		params.put("userId",user.email);
 		params.put("chunks",chunksForUnregisterByUser);
 
-		callService("/videoService/unregisterChunks", params);
+		callService("/chunkService/unregisterChunks", params);
 		
 		video.refresh();
 		
@@ -339,7 +334,7 @@ public class RetrievalPlanTest extends BaseFunctionalTest{
 	
 	private List<Integer> chunkOrdinalsForExistentVideo(Video video, String chunks) {
 		List<Integer> result = new ArrayList<Integer>(
-				VideoService.chunkOrdinalsForExistentVideo(video, chunks).keySet()
+				ChunkService.chunkOrdinalsForExistentVideo(video, chunks).keySet()
 				);
 		return result;
 	}

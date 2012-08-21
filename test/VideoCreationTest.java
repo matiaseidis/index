@@ -10,9 +10,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.gson.JsonObject;
+
 import play.mvc.Http.Response;
 import play.test.Fixtures;
-import play.test.FunctionalTest;
 
 
 public class VideoCreationTest extends BaseFunctionalTest {
@@ -41,15 +42,40 @@ public class VideoCreationTest extends BaseFunctionalTest {
 		/*
 		 * alta de video
 		 */
-		Video video = new Video("videoId", "fileName", videoLenght, chunks, user1);
 		
-		Assert.assertTrue(video.create());
+		StringBuilder sb = new StringBuilder();
+		for(int i = 0; i<chunks.size(); i++) {
+			sb.append(chunks.get(i) );
+			if(i != chunks.size()-1) {
+				sb.append("!");
+			}
+		}
 		
-		registerChunks(user1, 0, 99, video);
+		Map<String, String> params = new HashMap<String, String>();
+		params.put("videoId", "videoId");
+		params.put("fileName", "fileName");
+		params.put("lenght", Integer.toString(123456));
+		params.put("userId", user1.email);
+		params.put("chunks", sb.toString());
 		
-		video.delete();
+		Response response = callService("/videoService/registerVideo", params);
 		
-		Assert.assertTrue("No deberia haber videos",Video.count() == 0);
+		Assert.assertTrue( Video.count() == 1);
+		
+		JsonObject jsonObject = codeOk(response);
+		
+//		response = callService("/videoService/create", params);
+//		
+//		
+//		Video video = new Video("videoId", "fileName", videoLenght, chunks, user1);
+//		
+//		Assert.assertTrue(video.create());
+//		
+//		registerChunks(user1, 0, 99, video);
+//		
+//		video.delete();
+//		
+//		Assert.assertTrue("No deberia haber videos",Video.count() == 0);
 	}
 	
 	private void registerChunks(User user, int from, int to, Video video) {
