@@ -9,7 +9,7 @@ import play.mvc.Controller;
 import controllers.response.Ok;
 import controllers.response.TodoMal;
 
-public class PlanService extends Controller {
+public class PlanService extends BaseService {
 
 
 
@@ -20,7 +20,7 @@ public class PlanService extends Controller {
 
 		if(validation.hasErrors()){
 			play.Logger.error("Invalid params: %s", params);
-			render(new TodoMal("Invalid params"));
+			jsonError("Invalid params");
 		}
 		
 		play.Logger.info("Retrieval plan requested by user: "+userId+" for video: "+videoId);
@@ -30,20 +30,20 @@ public class PlanService extends Controller {
 		
 		if(planRequester == null){
 			play.Logger.error("No existe el planRequester: %s", userId);
-			render(new TodoMal("No existe el planRequester "+userId));
+			jsonError("No existe el planRequester "+userId);
 		}
 		
 		if(video == null){
 			play.Logger.error("No existe el video: %s", videoId);
-			render(new TodoMal("No existe el video "+videoId));
+			jsonError("No existe el video "+videoId);
 		}
 		
 		RetrievalPlan plan = new RetrievalPlanCreator(video, planRequester).generateRetrievalPlan();
 		
 		if(plan == null) {
-			renderJSON(new TodoMal("Unable to ellaborate retrieving plan for video "+video.videoId+" for user "+planRequester.email+" - not enough sources available"));
+			jsonError("Unable to ellaborate retrieving plan for video "+video.videoId+" for user "+planRequester.email+" - not enough sources available");
 		} 
 		play.Logger.info("Returning retrieval plan for video: " + videoId);
-		renderJSON(new Ok<RetrievalPlan>(plan));
+		jsonOk(plan);
 	}
 }

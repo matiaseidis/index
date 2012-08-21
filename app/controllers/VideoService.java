@@ -16,13 +16,13 @@ import play.mvc.Controller;
 import controllers.response.Ok;
 import controllers.response.TodoMal;
 
-public class VideoService extends Controller {
+public class VideoService extends BaseService {
 
 	public static void registerVideo(@NotNull String videoId, @NotNull  String fileName, @NotNull Long lenght, @NotNull String userId, @NotNull String chunks){
 		
 		if(validation.hasErrors()){
 			play.Logger.error("Invalid params: %s", params);
-			render(new TodoMal("Invalid params"));
+			jsonError("Invalid params");
 		}
 		
 		play.Logger.info("Video registration requested by user: "+userId+" for video: "+videoId);
@@ -32,12 +32,12 @@ public class VideoService extends Controller {
 		
 		if(registrationRequester == null){
 			play.Logger.error("No existe el registrationRequester: %s", userId);
-			renderJSON(new TodoMal("No existe el registrationRequester "+userId));
+			jsonError("No existe el registrationRequester "+userId);
 		}
 		
 		if(video != null){
 			play.Logger.error("El video que se quiere registrar ya existe en el indice: %s", videoId);
-			renderJSON(new TodoMal("El video que se quiere registrar ya existe en el indice: "+videoId));
+			jsonError("El video que se quiere registrar ya existe en el indice: "+videoId);
 		}
 		
 		video = new Video(videoId, fileName, lenght, chunkIds(chunks), registrationRequester);
@@ -45,16 +45,15 @@ public class VideoService extends Controller {
 		try{
 			video = video.save();
 			play.Logger.info("Se registro el video <id: "+videoId+"><fileName: "+fileName+"> en el indice");
-			renderJSON(new Ok("Se registro el video <id: "+videoId+"><fileName: "+fileName+"> en el indice"));
+			jsonOk("Se registro el video <id: "+videoId+"><fileName: "+fileName+"> en el indice");
 		} catch(Exception e) {
 			play.Logger.error("No se pudo registrar el video <id: "+videoId+"><fileName: "+fileName+"> en el indice");
-			renderJSON(new TodoMal("No se pudo registrar el video <id: "+videoId+"><fileName: "+fileName+"> en el indice"));
+			jsonError("No se pudo registrar el video <id: "+videoId+"><fileName: "+fileName+"> en el indice");
 		}
 		
 	}
 
 	public static void registerChunks(@NotNull String videoId, @NotNull String userId, @NotNull String chunks){
-		
 
 		if(validation.hasErrors()){
 			play.Logger.error("Invalid params: %s", params);
@@ -68,42 +67,42 @@ public class VideoService extends Controller {
 		
 		if(registrationRequester == null){
 			play.Logger.error("No existe el cacho registration requester: %s", userId);
-			renderJSON(new TodoMal("No existe el cacho registration requester "+userId));
+			jsonError("No existe el cacho registration requester "+userId);
 		}
 		
 		if(video == null){
 			play.Logger.error("El video del que se quieren registrar cachos no existe en el indice: %s", videoId);
-			renderJSON(new TodoMal("El video del que se quieren registrar cachos no existe en el indice: "+videoId));
+			jsonError("El video del que se quieren registrar cachos no existe en el indice: "+videoId);
 		}
 		
 		Map<Integer, String> chunkOrdinals = chunkOrdinalsForExistentVideo(video, chunks);
 		
 		if(MapUtils.isEmpty(chunkOrdinals)){
 			play.Logger.error("No chunks passed for register for video: "+videoId);
-			renderJSON(new TodoMal("No chunks passed for register for video: "+videoId));
+			jsonError("No chunks passed for register for video: "+videoId);
 		}
 		
-		play.Logger.info("registering chunks "+chunkOrdinals+"for video "+videoId+" by user " + userId);
+		play.Logger.info("registering chunks "+chunkOrdinals+" for video "+videoId+" by user " + userId);
 		
 		try {
 			if (video.registerChunks(registrationRequester, new ArrayList(chunkOrdinals.keySet()))) {
-				renderJSON(new Ok("registered chunks by: "+ userId +" for video: "+videoId+" - "+chunks));
+				jsonOk("registered chunks by: "+ userId +" for video: "+videoId+" - "+chunks);
 			} else {
 				
 				play.Logger.error("unable to register chunks "+ userId +" - "+videoId+" - "+chunks);
-				renderJSON(new TodoMal("unable to register chunks "+ userId +" - "+videoId+" - "+chunks));
+				jsonError("unable to register chunks "+ userId +" - "+videoId+" - "+chunks);
 			}
 		} catch (Exception e) {
 		}
 		
-		renderJSON(new Ok(chunkOrdinals));
+		jsonOk(chunkOrdinals);
 	}
 
 	public static void unregisterChunks(@NotNull String videoId, @NotNull String userId, @NotNull String chunks) {
 		
 		if(validation.hasErrors()){
 			play.Logger.error("Invalid params: %s", params);
-			render(new TodoMal("Invalid params"));
+			jsonError("Invalid params");
 		}
 		
 		play.Logger.info("Cacho registration requested by user: "+userId+" for video: "+videoId);
@@ -113,30 +112,30 @@ public class VideoService extends Controller {
 		
 		if(registrationRequester == null){
 			play.Logger.error("No existe el cacho unregistration requester: %s", userId);
-			renderJSON(new TodoMal("No existe el cacho unregistration requester "+userId));
+			jsonError("No existe el cacho unregistration requester "+userId);
 		}
 		
 		if(video == null){
 			play.Logger.error("El video del que se quieren desregistrar cachos no existe en el indice: %s", videoId);
-			renderJSON(new TodoMal("El video del que se quieren desregistrar cachos no existe en el indice: "+videoId));
+			jsonError("El video del que se quieren desregistrar cachos no existe en el indice: "+videoId);
 		}
 		
 		Map<Integer, String> chunkOrdinals = chunkOrdinalsForExistentVideo(video, chunks);
 		if(MapUtils.isEmpty(chunkOrdinals)){
 			play.Logger.error("No chunks passed for unregister for video: "+videoId);
-			renderJSON(new TodoMal("No chunks passed for unregister for video: "+videoId));
+			jsonError("No chunks passed for unregister for video: "+videoId);
 		}
 		
 		play.Logger.info("unregistering chunks "+chunkOrdinals+"for video "+videoId+" by user " + userId);
 		
 		if (video.unregisterChunks(registrationRequester, new ArrayList(chunkOrdinals.keySet()))) {
-			renderJSON(new Ok("unregistered chunks by: "+ userId +" for video: "+videoId+" - "+chunks));
+			jsonOk("unregistered chunks by: "+ userId +" for video: "+videoId+" - "+chunks);
 		} else {
 			play.Logger.error("unable to unregistered chunks "+ userId +" - "+videoId+" - "+chunks);
-			renderJSON(new TodoMal("unable to unregistered chunks "+ userId +" - "+videoId+" - "+chunks));
+			jsonError("unable to unregistered chunks "+ userId +" - "+videoId+" - "+chunks);
 		}
 		
-		renderJSON(new Ok(chunkOrdinals));
+		jsonOk(chunkOrdinals);
 	}
 
 	public static Map<Integer, String> chunkOrdinalsForExistentVideo(Video video, String chunks) {

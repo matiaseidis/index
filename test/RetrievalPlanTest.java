@@ -45,12 +45,7 @@ public class RetrievalPlanTest extends BaseFunctionalTest{
 	private String userId_4 = "test-user-id-4";
 
 	String videoChunks;
-	
-	@Before
-    public void setUp() {
-        Fixtures.deleteDatabase();
-    }
-	
+
 	@Test
 	public void testRestrievalPlan(){
 

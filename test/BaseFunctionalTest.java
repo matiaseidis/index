@@ -3,17 +3,30 @@ import java.util.Map;
 
 import junit.framework.Assert;
 
+import org.junit.Before;
 import org.junit.Ignore;
+
+import play.mvc.After;
+import play.mvc.Http.Response;
+import play.test.Fixtures;
+import play.test.FunctionalTest;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import play.mvc.Http.Response;
-import play.test.FunctionalTest;
-
 @Ignore
 public class BaseFunctionalTest extends FunctionalTest {
+	
+	@Before
+    public void setUp() {
+        Fixtures.deleteDatabase();
+    }
+	
+	@After
+    public void cleanUp() {
+        Fixtures.deleteDatabase();
+    }
 
 	protected Response callService(String url, Map<String, String> params) {
 

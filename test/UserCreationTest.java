@@ -22,11 +22,6 @@ public class UserCreationTest extends BaseFunctionalTest {
 	String ip = "173.194.42.3";
 	int port = 1234;
 	
-	@Before
-    public void setUp() {
-        Fixtures.deleteDatabase();
-    }
-	
 	@Test
 	public void testUserCreation(){
 		
