@@ -15,7 +15,7 @@ import play.test.Fixtures;
 import play.test.FunctionalTest;
 
 
-public class VideoCreationTest extends FunctionalTest {
+public class VideoCreationTest extends BaseFunctionalTest {
 	
 	private long chunkSize = 1024*1024;
 	private long lastChunkSize = chunkSize/2;//bytes
@@ -78,14 +78,4 @@ public class VideoCreationTest extends FunctionalTest {
 		}
 	}
 	
-	private void callService(String url, Map<String, String> params) {
-		
-		Map<String, String> headers = new HashMap<String, String>();
-		headers.put("Content-Type", "application/json");
-		
-		Response response = POST(url, params);
-        assertIsOk(response);
-        assertContentType("application/json", response);
-        assertCharset("utf-8", response);
-	}
 }

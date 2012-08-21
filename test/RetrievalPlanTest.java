@@ -23,7 +23,7 @@ import play.test.FunctionalTest;
 import controllers.VideoService;
 
 
-public class RetrievalPlanTest extends FunctionalTest{
+public class RetrievalPlanTest extends BaseFunctionalTest{
 	
 	/*
 	 * FIXME registrar usuario y pedir plan por WS, no por api
@@ -54,16 +54,10 @@ public class RetrievalPlanTest extends FunctionalTest{
 	@Test
 	public void testRestrievalPlan(){
 
-//		Tracking tracking = new Tracking();
-		
-		User user1 = new User(userId_1, userId_1+"@gmail.com", "10.10.10.10", 1234);
-		Assert.assertTrue(user1.create());
-		User user2 = new User(userId_2, userId_2+"@gmail.com", "10.10.10.10", 1234);
-		Assert.assertTrue(user2.create());
-		User user3 = new User(userId_3, userId_3+"@gmail.com", "10.10.10.10", 1234);
-		Assert.assertTrue(user3.create());
-		User user4 = new User(userId_4, userId_4+"@gmail.com", "10.10.10.10", 1234);
-		Assert.assertTrue(user4.create());
+		User user1 = createUser(userId_1, userId_1+"@gmail.com", "10.10.10.10", 1234);
+		User user2 = createUser(userId_2, userId_2+"@gmail.com", "10.10.10.11", 1234);
+		User user3 = createUser(userId_3, userId_3+"@gmail.com", "10.10.10.12", 1234);
+		User user4 = createUser(userId_4, userId_4+"@gmail.com", "10.10.10.13", 1234);
 		
 		Video video = registerNewVideo(user1);
 		registerChunks(user1, 0, 99, video);
@@ -231,6 +225,23 @@ public class RetrievalPlanTest extends FunctionalTest{
 	}
 	
 	
+	private User createUser(String userName, String email, String ip, int port) {
+		
+		Map<String, String> params = new HashMap<String, String>();
+		params.put("name", userName);
+		params.put("email", email);
+		params.put("ip", ip);
+		params.put("port", Integer.toString(port));
+		
+		Response response = callService("/userService/create", params);
+		super.codeOk(response);
+		
+		User user = User.find("email=?", email).first();
+		Assert.assertNotNull(user);
+		return user;
+		
+	}
+
 	private UserCacho primerCachoDelUser1(List<UserCacho> userCachos, User user) {
 		for(UserCacho uc : userCachos) {
 			if(uc.getUser().email.equals(user.email)){
@@ -315,19 +326,6 @@ public class RetrievalPlanTest extends FunctionalTest{
 		}
 	}
 
-
-	private void callService(String url, Map<String, String> params) {
-		
-		Map<String, String> headers = new HashMap<String, String>();
-		headers.put("Content-Type", "application/json");
-		
-		Response response = POST(url, params);
-        assertIsOk(response);
-        assertContentType("application/json", response);
-        assertCharset("utf-8", response);
-	}
-
-
 	private Video registerNewVideo(User user) {
 		
 		List<String> chunks = new ArrayList<String>();
@@ -348,7 +346,6 @@ public class RetrievalPlanTest extends FunctionalTest{
 		List<Integer> result = new ArrayList<Integer>(
 				VideoService.chunkOrdinalsForExistentVideo(video, chunks).keySet()
 				);
-		
 		return result;
 	}
 

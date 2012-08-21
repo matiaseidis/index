@@ -1,14 +1,12 @@
 package models;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import javax.persistence.Entity;
 
 import net.sf.oval.constraint.NotEmpty;
+import play.data.validation.Email;
+import play.data.validation.IPv4Address;
 import play.data.validation.Required;
+import play.data.validation.Unique;
 import play.db.jpa.Model;
 
 @Entity
@@ -16,9 +14,9 @@ public class User extends Model{
 
 	@Required @NotEmpty
 	public String name;
-	@Required @NotEmpty
+	@Required @NotEmpty @Email
 	public String email;
-	@Required @NotEmpty
+	@Required @Unique @NotEmpty @IPv4Address
 	public String ip;
 	@Required
 	public int port;
