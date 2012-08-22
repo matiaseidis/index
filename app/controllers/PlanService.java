@@ -11,11 +11,6 @@ import controllers.response.TodoMal;
 
 public class PlanService extends BaseService {
 
-
-
-//	@RequestMapping(value="{videoId}/{userId}", method = RequestMethod.GET)
-//	public @ResponseBody Respuesta<RetrievalPlan> getRetrievalPlan(@PathVariable String videoId, @PathVariable String userId){
-		
 	public static void getRetrievalPlan(@NotNull String videoId, @NotNull String userId){
 
 		if(validation.hasErrors()){

@@ -10,9 +10,12 @@ import net.sf.oval.constraint.NotNull;
 
 import org.apache.commons.collections.MapUtils;
 
+import play.Play;
+
 import controllers.response.TodoMal;
 
 public class ChunkService extends BaseService {
+	
 	
 	public static void registerChunks(@NotNull String videoId, @NotNull String userId, @NotNull String chunks){
 
@@ -103,7 +106,7 @@ public class ChunkService extends BaseService {
 
 		Map<Integer, String> result = new HashMap<Integer, String>();
 		
-		for(String chunk : chunks.split("\\&")){
+		for(String chunk : chunks.split("\\"+CHUNK_FOR_REGISTER_SEPARATOR)){
 			String[] splittedChunk = chunk.split("!");
 			int chunkOrdinal = Integer.parseInt(splittedChunk[0]);
 			String chunkId = splittedChunk[1];

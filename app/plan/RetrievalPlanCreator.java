@@ -17,13 +17,18 @@ import models.Video;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Transformer;
 
+import play.Play;
+
 public class RetrievalPlanCreator {
 
 	private final Video video;
 	private final User planRequester;
 
-	private int maxCachoSize = 64; 
-	private long chunkSize = 1024 * 1024;
+	/*
+	 * TODO usar el maxCachoSize para limitar el tamaño de los cachos
+	 */
+	private int maxCachoSize = Integer.valueOf(Play.configuration.getProperty("max.cacho.size")); 
+	private long chunkSize = Long.valueOf(Play.configuration.getProperty("chunk.size")) * 1024 * 1024;
 
 	public RetrievalPlanCreator(Video video, User user) {
 		super();

@@ -12,12 +12,13 @@ import net.sf.oval.constraint.NotNull;
 
 import org.apache.commons.collections.MapUtils;
 
+import play.Play;
 import play.mvc.Controller;
 import controllers.response.Ok;
 import controllers.response.TodoMal;
 
 public class VideoService extends BaseService {
-
+	
 	public static void registerVideo(@NotNull String videoId, @NotNull  String fileName, @NotNull Long lenght, @NotNull String userId, @NotNull String chunks){
 		
 		if(validation.hasErrors()){
@@ -52,9 +53,11 @@ public class VideoService extends BaseService {
 		}
 		
 	}
+	
+	
 
 	private static List<String> chunkIds(String chunks) {
-		return Arrays.asList(chunks.split("!"));
+		return Arrays.asList(chunks.split(CHUNK_SEPARATOR));
 	}
 }
 
