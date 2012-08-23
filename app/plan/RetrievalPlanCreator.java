@@ -23,9 +23,11 @@ public class RetrievalPlanCreator {
 
 	private final Video video;
 	private final User planRequester;
+	private final CachoPropioMaker cachoPropioMaker;
+	private final CachoAjenoMaker cachoAjenoMaker;
 
 	/*
-	 * TODO usar el maxCachoSize para limitar el tamaño de los cachos
+	 * TODO usar el maxCachoSize para limitar el tamaño de los cachos -> ¿va esto?
 	 */
 	private int maxCachoSize = Integer.valueOf(Play.configuration.getProperty("max.cacho.size")); 
 	private long chunkSize = Long.valueOf(Play.configuration.getProperty("chunk.size")) * 1024 * 1024;
@@ -34,9 +36,13 @@ public class RetrievalPlanCreator {
 		super();
 		this.video = video;
 		this.planRequester = user;
+		cachoPropioMaker = new CachoPropioMaker(user, video);
+		cachoAjenoMaker = new CachoAjenoMaker(video);
 	}
 
 	public RetrievalPlan generateRetrievalPlan(){
+		
+		boolean firstCacho = true;
 
 		List<UserChunks> userChunks = new ArrayList<UserChunks>(video.userChunks);
 	
@@ -52,26 +58,28 @@ public class RetrievalPlanCreator {
 			 */
 			UserChunks nextCacho = null;
 			if (planRequesterChunks.hasChunk(i)){
-				nextCacho = requesterCacho(i, planRequesterChunks);
-
+				nextCacho = cachoPropioMaker.makeCacho(i, planRequesterChunks);
+				
 			} else {
 				/*
 				 * en cuento deja de tener, inflo uno para el que menos tenga a partir del current chunk 
 				 * o hasta que el requester vuelva a tener el chunk
 				 * 
 				 */
-				UserChunks noRequesterShortestCacho = noRequesterShortestCacho(i, planRequesterChunks, noPlanRequesterChunks);
+				UserChunks noRequesterShortestCacho = cachoAjenoMaker.makeCacho(i, planRequesterChunks, noPlanRequesterChunks, firstCacho);
+				
 				if(noRequesterShortestCacho == null) {
 					return null;
 				}
 				nextCacho = noRequesterShortestCacho;
 
 			}
+			firstCacho = false;
 			result.add(nextCacho);
 			if(nextCacho.hasChunk(video.chunks.size()-1)){
 				return retrievalPlanFor(video, cachosFrom(result, video));
 			} 
-			i = higherChunk(nextCacho);
+			i = nextCacho.higherChunkPosition();
 		}
 		play.Logger.error("Unable to ellaborate retrieving plan for video %s for user %s - not enough sources available", video.videoId, planRequester.email);
 		return null;
@@ -88,86 +96,6 @@ public class RetrievalPlanCreator {
 		}
 
 		return result;
-	}
-
-	private List<UserChunks> thisUserChunkList(List<UserChunks> userChunks) {
-
-		return (List<UserChunks>) CollectionUtils.collect(userChunks, new Transformer() {
-
-			@Override
-			public Object transform(Object obj) {
-				UserChunks uc = (UserChunks) obj;
-				if (uc.user.equals(planRequester) ) {
-					return uc;
-				}
-				return null;
-			}
-		});
-	}
-
-	private int higherChunk(UserChunks nextCacho) {
-
-		int result = 0;
-
-		for(UserChunk i : nextCacho.chunks) {
-			if(i.position > result) {
-				result = i.position;
-			}
-		}
-
-		return result;
-	}
-
-	private UserChunks noRequesterShortestCacho(int from,
-			UserChunks planRequesterChunks,
-			List<UserChunks> noPlanRequesterChunks) {
-
-		List<UserChunks> enCarrera = new ArrayList<UserChunks>();
-
-		for(UserChunks uc : noPlanRequesterChunks) {
-			if(uc.hasChunk(from)) {
-				enCarrera.add(uc);
-			}
-		}
-
-		if(enCarrera.isEmpty()){
-
-			return null;
-
-		} else {
-			Collections.sort(enCarrera, new ShortestCachoComparator(from, video.chunks.size()-1));
-
-			UserChunks shortest = new UserChunks(enCarrera.get(0).user);
-
-			boolean done = false;
-			while(!done) {
-
-				if(!planRequesterChunks.hasChunk(from) && enCarrera.get(0).hasChunk(from) ) {
-					shortest.chunks.add(new UserChunk(from));
-					from++;
-				} else {
-					done = true;
-				}
-			}
-
-			return shortest;
-		}
-	}
-
-	private UserChunks requesterCacho(int from, UserChunks planRequesterChunks) {
-		UserChunks uc = new UserChunks(planRequester);
-
-		for(int i = from; i<video.chunks.size();i++){
-			if(planRequesterChunks.hasChunk(i)){
-				uc.chunks.add(new UserChunk(i));
-			} else {
-				return uc;
-			}
-		}
-		/*
-		 * si el requester tiene todo el video...
-		 */
-		return uc;
 	}
 
 	private RetrievalPlan retrievalPlanFor(Video video,

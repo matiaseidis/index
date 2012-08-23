@@ -40,6 +40,19 @@ public class UserChunks extends Model{
 	public String toString() {
 		return "UserChunks [userId=" + user.email + ", chunks=" + chunks + "]";
 	}
+	
+	public int higherChunkPosition() {
+		
+		int result = 0;
+		
+		for(UserChunk i : this.chunks) {
+			if(i.position > result) {
+				result = i.position;
+			}
+		}
+		
+		return result;
+	}
 
 //	public boolean addChunksFromPositions(List<Integer> c) {
 //		

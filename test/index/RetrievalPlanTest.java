@@ -72,23 +72,15 @@ public class RetrievalPlanTest extends BaseFunctionalTest{
 		RetrievalPlan retrievalPlan = new RetrievalPlanCreator(video, user1).generateRetrievalPlan();
 		
 		Assert.assertNotNull(retrievalPlan);
-		List<UserCacho> userCachos = retrievalPlan.getUserCachos(); 
 		
-		Assert.assertTrue(retrievalPlan.getUserCachos().size() == 4);
+		List<UserCacho> userCachos = assertCachos(retrievalPlan, 4);
 
+		assertTotalSize(retrievalPlan.getUserCachos());
+		
 		UserCacho primerCachoDelUser1 = cachoDelUser(userCachos, user1);
 		UserCacho userCachoDelUser2 = cachoDelUser(userCachos, user2);
 		UserCacho userCachoDelUser3 = cachoDelUser(userCachos, user3);
 		UserCacho userCachoDelUser4 = cachoDelUser(userCachos, user4);
-		
-		long retrievalSize = primerCachoDelUser1.getCacho().lenght +
-				userCachoDelUser2.getCacho().lenght +
-				userCachoDelUser3.getCacho().lenght +
-				userCachoDelUser4.getCacho().lenght;
-		
-		Assert.assertEquals(
-				"Video size:"+videoLenght+" should be equal to the sum of all the retrieval plan cachos sizes: "+retrievalSize,
-				retrievalSize, videoLenght);
 		
 		/*
 		 * registro el mismo chunk que registre con el user 4, con el user 1, que es el que pide el plan.
@@ -103,9 +95,7 @@ public class RetrievalPlanTest extends BaseFunctionalTest{
 		 */
 		retrievalPlan = new RetrievalPlanCreator(video, user1).generateRetrievalPlan();
 
-		Assert.assertNotNull(retrievalPlan);
-		userCachos = retrievalPlan.getUserCachos(); 
-		Assert.assertEquals(5, userCachos.size());
+		userCachos = assertCachos(retrievalPlan, 5);
 		
 		primerCachoDelUser1 = primerCachoDelUser1(userCachos, user1);
 		userCachoDelUser2 = cachoDelUser(userCachos, user2);
@@ -113,15 +103,7 @@ public class RetrievalPlanTest extends BaseFunctionalTest{
 		userCachoDelUser4 = cachoDelUser(userCachos, user4);
 		UserCacho segundoCachoDelUser1 = segundoCachoDelUser1(userCachos, user1);
 		
-		retrievalSize = primerCachoDelUser1.getCacho().lenght +
-				segundoCachoDelUser1.getCacho().lenght +
-				userCachoDelUser2.getCacho().lenght +
-				userCachoDelUser3.getCacho().lenght +
-				userCachoDelUser4.getCacho().lenght;
-		
-		Assert.assertEquals(
-				"Video size:"+videoLenght+" should be equal to the sum of all the retrieval plan cachos sizes: "+retrievalSize,
-				retrievalSize, videoLenght);
+		assertTotalSize(retrievalPlan.getUserCachos());
 		
 		/*
 		 * registro el mismo chunk que registre con el user 4, con el user 1, que es el que pide el plan.
@@ -136,9 +118,7 @@ public class RetrievalPlanTest extends BaseFunctionalTest{
 		 */
 		retrievalPlan = new RetrievalPlanCreator(video, user1).generateRetrievalPlan(); 
 		
-		Assert.assertNotNull(retrievalPlan);
-		userCachos = retrievalPlan.getUserCachos(); 
-		Assert.assertEquals(4, userCachos.size());
+		userCachos = assertCachos(retrievalPlan, 4);
 		
 		
 		primerCachoDelUser1 = primerCachoDelUser1(userCachos, user1);
@@ -146,14 +126,7 @@ public class RetrievalPlanTest extends BaseFunctionalTest{
 		userCachoDelUser3 = cachoDelUser(userCachos, user3);
 		segundoCachoDelUser1 = segundoCachoDelUser1(userCachos, user1);
 
-		retrievalSize = primerCachoDelUser1.getCacho().lenght +
-				segundoCachoDelUser1.getCacho().lenght +
-				userCachoDelUser2.getCacho().lenght +
-				userCachoDelUser3.getCacho().lenght;
-		
-		Assert.assertEquals(
-				"Video size:"+videoLenght+" should be equal to the sum of all the retrieval plan cachos sizes: "+retrievalSize,
-				retrievalSize, videoLenght);
+		assertTotalSize(retrievalPlan.getUserCachos());
 
 		Assert.assertEquals(primerCachoDelUser1.getCacho().from, 0);
 		Assert.assertEquals(userCachoDelUser2.getCacho().from, chunkSize*100);
@@ -164,8 +137,6 @@ public class RetrievalPlanTest extends BaseFunctionalTest{
 		Assert.assertEquals(userCachoDelUser2.getCacho().lenght, chunkSize*100);
 		Assert.assertEquals(userCachoDelUser3.getCacho().lenght, chunkSize*100);
 		Assert.assertEquals(segundoCachoDelUser1.getCacho().lenght, chunkSize*100 + chunkSize/2);
-		
-		
 		
 		/*
 		 * unregister
@@ -180,6 +151,26 @@ public class RetrievalPlanTest extends BaseFunctionalTest{
 	}
 	
 	
+	private List<UserCacho> assertCachos(RetrievalPlan retrievalPlan, int cachos) {
+		Assert.assertNotNull(retrievalPlan);
+		Assert.assertTrue("Cachos: "+retrievalPlan.getUserCachos().size(),retrievalPlan.getUserCachos().size() == cachos);
+		return retrievalPlan.getUserCachos();
+	}
+
+
+	private long assertTotalSize(List<UserCacho> userCachos) {
+		long size = 0;
+		for(UserCacho uc : userCachos) {
+			size += uc.getCacho().lenght;
+		}
+		
+		Assert.assertEquals(
+				"Video size:"+videoLenght+" should be equal to the sum of all the retrieval plan cachos sizes: "+size,
+				size, videoLenght);
+		return size;
+	}
+
+
 	private void registerChunksForAllUsers() {
 		registerChunks(user1, 0, 99, video);
 		registerChunks(user2, 100, 199, video);
