@@ -67,6 +67,11 @@ public class RetrievalPlanCreator {
 				 * 
 				 */
 				UserChunks noRequesterShortestCacho = cachoAjenoMaker.makeCacho(i, planRequesterChunks, noPlanRequesterChunks, firstCacho);
+				/*
+				 * round robin
+				 */
+				noPlanRequesterChunks.remove(noRequesterShortestCacho);
+				
 				
 				if(noRequesterShortestCacho == null) {
 					return null;
@@ -118,7 +123,9 @@ public class RetrievalPlanCreator {
 		long from =  uc.chunks.get(0).position * chunkSize;
 		long lenght = uc.chunks.size() * chunkSize;
 
-		boolean lastCacho = (uc.chunks.get(uc.chunks.size()-1).position) == video.chunks.size()-1;
+		
+		//*TODO*/
+		boolean lastCacho = (uc.chunks.get(uc.chunks.size()-1).position) == video.chunks.size();
 
 		if(lastCacho){
 			long diff  = chunkSize - (video.lenght % chunkSize);

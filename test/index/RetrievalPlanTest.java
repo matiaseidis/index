@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import junit.framework.TestCase;
-
 import models.RetrievalPlan;
 import models.User;
 import models.UserCacho;
@@ -16,6 +15,7 @@ import models.UserChunks;
 import models.Video;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import plan.RetrievalPlanCreator;
@@ -53,8 +53,50 @@ public class RetrievalPlanTest extends BaseFunctionalTest{
 	Video video = null;
 	List<UserChunk> chunks = null;
 	
+	@Test
+	public void testForSeveralUsersWithTheFullVideo() {
+		/*
+		 * crea usuarios
+		 */
+		int usersWithCachos = 4;
+		int maxChunkAjenoSize = 64;
+		int totalChunks = usersWithCachos*maxChunkAjenoSize;
+		long vLenght = totalChunks*1024*1024;
+		User register = createUser("register", "register@gmail.com", "10.10.10.1", 9999);
+		Video v = registerNewVideo(register, totalChunks, vLenght);
+		registerChunks(register, 0, totalChunks -1, v);
+
+		User pobreton = createUser("pobreton", "pobreton@gmail.com", "1.1.1.1", 9999);
+		
+		for(int i = 1; i<usersWithCachos;i++) {
+			User u = createUser("userId_"+i, "userId_full_video_"+i+"@gmail.com", "10.10.10.1"+i, i);
+			/*
+			 * 64 mb por user
+			 */
+			registerChunks(u, 0, totalChunks -1, v);
+			/*
+			 * load user cachos   
+			 */
+			List<UserChunk> chunks = v.getChunksFrom(u).chunks;
+			Assert.assertEquals(u.email, totalChunks, chunks.size());
+		}
+		
+		RetrievalPlan p = new RetrievalPlanCreator(v, pobreton).generateRetrievalPlan();
+		
+		List<UserCacho> userCachos = assertCachos(p, usersWithCachos);
+
+		assertTotalSize(totalChunks*1024*1024, p.getUserCachos());
+		
+		
+		
+		
+		
+	}
+	
+	
 
 	@Test
+	@Ignore
 	public void testRestrievalPlan(){
 
 		user1 = createUser(userId_1, userId_1+"@gmail.com", "10.10.10.10", 1234);
@@ -62,7 +104,7 @@ public class RetrievalPlanTest extends BaseFunctionalTest{
 		user3 = createUser(userId_3, userId_3+"@gmail.com", "10.10.10.12", 1234);
 		user4 = createUser(userId_4, userId_4+"@gmail.com", "10.10.10.13", 1234);
 		
-		registerNewVideo(user1);
+		registerNewVideo(user1, 401, videoLenght);
 		
 		registerChunksForAllUsers();
 		
@@ -75,7 +117,7 @@ public class RetrievalPlanTest extends BaseFunctionalTest{
 		
 		List<UserCacho> userCachos = assertCachos(retrievalPlan, 4);
 
-		assertTotalSize(retrievalPlan.getUserCachos());
+		assertTotalSize(videoLenght, retrievalPlan.getUserCachos());
 		
 		UserCacho primerCachoDelUser1 = cachoDelUser(userCachos, user1);
 		UserCacho userCachoDelUser2 = cachoDelUser(userCachos, user2);
@@ -103,7 +145,7 @@ public class RetrievalPlanTest extends BaseFunctionalTest{
 		userCachoDelUser4 = cachoDelUser(userCachos, user4);
 		UserCacho segundoCachoDelUser1 = segundoCachoDelUser1(userCachos, user1);
 		
-		assertTotalSize(retrievalPlan.getUserCachos());
+		assertTotalSize(videoLenght, retrievalPlan.getUserCachos());
 		
 		/*
 		 * registro el mismo chunk que registre con el user 4, con el user 1, que es el que pide el plan.
@@ -126,7 +168,7 @@ public class RetrievalPlanTest extends BaseFunctionalTest{
 		userCachoDelUser3 = cachoDelUser(userCachos, user3);
 		segundoCachoDelUser1 = segundoCachoDelUser1(userCachos, user1);
 
-		assertTotalSize(retrievalPlan.getUserCachos());
+		assertTotalSize(videoLenght, retrievalPlan.getUserCachos());
 
 		Assert.assertEquals(primerCachoDelUser1.getCacho().from, 0);
 		Assert.assertEquals(userCachoDelUser2.getCacho().from, chunkSize*100);
@@ -153,12 +195,13 @@ public class RetrievalPlanTest extends BaseFunctionalTest{
 	
 	private List<UserCacho> assertCachos(RetrievalPlan retrievalPlan, int cachos) {
 		Assert.assertNotNull(retrievalPlan);
-		Assert.assertTrue("Cachos: "+retrievalPlan.getUserCachos().size(),retrievalPlan.getUserCachos().size() == cachos);
+		Assert.assertTrue("Cachos for retrieval plan: "+retrievalPlan.getUserCachos().size()+" and no "+cachos
+				,retrievalPlan.getUserCachos().size() == cachos);
 		return retrievalPlan.getUserCachos();
 	}
 
 
-	private long assertTotalSize(List<UserCacho> userCachos) {
+	private long assertTotalSize(long videoLenght, List<UserCacho> userCachos) {
 		long size = 0;
 		for(UserCacho uc : userCachos) {
 			size += uc.getCacho().lenght;
@@ -300,18 +343,20 @@ public class RetrievalPlanTest extends BaseFunctionalTest{
 		}
 	}
 
-	private Video registerNewVideo(User user) {
+	private Video registerNewVideo(User user, int totalChunks, long lenght) {
 		
 		List<String> chunks = new ArrayList<String>();
-		for(int i = 0; i<401; i++) {
+		for(int i = 0; i<totalChunks; i++) {
 			chunks.add(Integer.toString(i));
 		}
 		/*
 		 * alta de video
 		 */
-		video = new Video(videoId, fileName, videoLenght, chunks, user);
+		double random = Math.random()*1000;
+		video = new Video(videoId+random, fileName+random, lenght, chunks, user);
 		
 		Assert.assertTrue(video.create());
+		Assert.assertTrue(video.chunks.size() == totalChunks);
 		return video;
 
 	}

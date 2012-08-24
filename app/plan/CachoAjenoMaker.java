@@ -39,23 +39,42 @@ public class CachoAjenoMaker {
 					return null;
 		
 				} else {
-					Collections.sort(enCarrera, new ShortestCachoComparator(from, video.chunks.size()-1));
-		
-					UserChunks shortest = new UserChunks(enCarrera.get(0).user);
-		
-					boolean done = false;
-					while(!done) {
-		
-						if(!planRequesterChunks.hasChunk(from) && enCarrera.get(0).hasChunk(from) ) {
-							shortest.chunks.add(new UserChunk(from));
-							from++;
-						} else {
-							done = true;
-						}
-					}
-		
-					return shortest;
+					Collections.sort(enCarrera, new LargestCachoComparator(from, video.chunks.size()-1));
+					
+					UserChunks shortest = selectCacho(from, enCarrera);
+					UserChunks shorted = cutCacho(from, shortest, planRequesterChunks);
+					
+					return shorted;
 				}
 
+	}
+
+	private UserChunks cutCacho(int from, UserChunks shortest, UserChunks planRequesterChunks) {
+		UserChunks result = new UserChunks(shortest.user);
+		
+		for(int i = from; i < maxCachoSize+from; i++){
+			if(planRequesterChunks.hasChunk(i)){
+				return result;
+			}
+			result.addChunk(new UserChunk(i));
+		}
+		
+		return result;
+	}
+
+	private UserChunks selectCacho(int from, List<UserChunks> enCarrera) {
+		UserChunks winner = enCarrera.get(0); // el mas grande
+		
+		for(UserChunks current : enCarrera) {
+			for(int i = from; i < maxCachoSize+from; i++){
+				if(!current.hasChunk(i)){
+					return winner;
+				} else {
+					winner = current;
+				}
+			}
+		}
+		
+		return winner;
 	}
 }
