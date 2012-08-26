@@ -1,3 +1,5 @@
+import index.BaseFunctionalTest;
+
 import org.junit.Ignore;
 
 @Ignore

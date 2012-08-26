@@ -1,22 +1,17 @@
 package plan;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import models.Cacho;
 import models.RetrievalPlan;
 import models.User;
 import models.UserCacho;
-import models.UserChunk;
 import models.UserChunks;
 import models.Video;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Transformer;
-
 import play.Play;
 
 public class RetrievalPlanCreator {
@@ -48,9 +43,13 @@ public class RetrievalPlanCreator {
 	
 		UserChunks planRequesterChunks = video.getChunksFrom(planRequester);
 
-		Set<UserChunks> result = new HashSet<UserChunks>();
+		SortedSet<UserChunks> result = new TreeSet<UserChunks>(new ChunkPositionComparator());
 
+		
 		List<UserChunks> noPlanRequesterChunks = noPlanRequesterChunks(userChunks);
+		
+		List<UserChunks> removedNoRequesterChunks = new ArrayList<UserChunks>();
+		
 
 		for(int i = 0; i<video.chunks.size(); i++) {
 			/*
@@ -70,11 +69,17 @@ public class RetrievalPlanCreator {
 				/*
 				 * round robin
 				 */
-				noPlanRequesterChunks.remove(noRequesterShortestCacho);
 				
+				removeFromNoRequesterUserChunks(noRequesterShortestCacho, noPlanRequesterChunks, removedNoRequesterChunks, i);
 				
 				if(noRequesterShortestCacho == null) {
-					return null;
+					/*
+					 * try again with excluded users
+					 */
+					noRequesterShortestCacho = cachoAjenoMaker.makeCacho(i, planRequesterChunks, removedNoRequesterChunks, firstCacho);
+					if(noRequesterShortestCacho == null) {
+						return null;
+					}
 				}
 				nextCacho = noRequesterShortestCacho;
 
@@ -82,12 +87,33 @@ public class RetrievalPlanCreator {
 			firstCacho = false;
 			result.add(nextCacho);
 			if(nextCacho.hasChunk(video.chunks.size()-1)){
-				return retrievalPlanFor(video, cachosFrom(result, video));
+				Set<UserChunks> mergedChunks = new SameUserChunksMerger().mergeChunks(result);
+				List<UserCacho> cachos = cachosFrom(mergedChunks, video);
+				return retrievalPlanFor(video, cachos);
 			} 
 			i = nextCacho.higherChunkPosition();
 		}
 		play.Logger.error("Unable to ellaborate retrieving plan for video %s for user %s - not enough sources available", video.videoId, planRequester.email);
 		return null;
+	}
+
+	private List<UserChunks> removeFromNoRequesterUserChunks(UserChunks noRequesterShortestCacho,
+			List<UserChunks> noPlanRequesterChunks, List<UserChunks> removedNoRequesterChunks, int from) {
+		
+		if(noRequesterShortestCacho == null){
+			return noPlanRequesterChunks;
+		}
+		
+
+//		List<UserChunks> toRemove = new ArrayList<UserChunks>();
+		for(UserChunks uc : noPlanRequesterChunks) {
+			if(uc.user.email.equals(noRequesterShortestCacho.user.email) && uc.hasChunk(from)) {
+				removedNoRequesterChunks.add(uc);
+			}
+		}
+		noPlanRequesterChunks.removeAll(removedNoRequesterChunks);
+		
+		return removedNoRequesterChunks;
 	}
 
 	private List<UserChunks> noPlanRequesterChunks(List<UserChunks> userChunks) {
@@ -125,10 +151,10 @@ public class RetrievalPlanCreator {
 
 		
 		//*TODO*/
-		boolean lastCacho = (uc.chunks.get(uc.chunks.size()-1).position) == video.chunks.size();
+		boolean lastCacho = (uc.chunks.get(uc.chunks.size()-1).position) == video.chunks.size()-1;
 
 		if(lastCacho){
-			long diff  = chunkSize - (video.lenght % chunkSize);
+			long diff  = video.lenght % chunkSize;
 			lenght-= diff;
 		}
 		Cacho cacho = new Cacho(from, lenght);

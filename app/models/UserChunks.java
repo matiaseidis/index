@@ -107,6 +107,19 @@ public class UserChunks extends Model{
 		return removed;
 	}
 
+	public int lowerChunkPosition() {
+		
+		int result = this.higherChunkPosition();
+		
+		for(UserChunk i : this.chunks) {
+			if(i.position < result) {
+				result = i.position;
+			}
+		}
+		
+		return result;
+	}
+
 	
 	
 	

@@ -4,19 +4,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import play.Play;
-
-import models.User;
 import models.UserChunk;
 import models.UserChunks;
 import models.Video;
+import play.Play;
 
 public class CachoAjenoMaker {
 
 	private final Video video;
 	private int firstCachoSize = Integer.valueOf(Play.configuration.getProperty("first.cacho.size"));
 	private int maxCachoSize = Integer.valueOf(Play.configuration.getProperty("max.cacho.size")); 
-	private long chunkSize = Long.valueOf(Play.configuration.getProperty("chunk.size")) * 1024 * 1024;
+
 
 	public CachoAjenoMaker(Video video) {
 		this.video = video;
@@ -42,18 +40,22 @@ public class CachoAjenoMaker {
 					Collections.sort(enCarrera, new LargestCachoComparator(from, video.chunks.size()-1));
 					
 					UserChunks shortest = selectCacho(from, enCarrera);
-					UserChunks shorted = cutCacho(from, shortest, planRequesterChunks);
+					UserChunks shorted = cutCacho(from, shortest, planRequesterChunks, firstCacho);
 					
 					return shorted;
 				}
 
 	}
 
-	private UserChunks cutCacho(int from, UserChunks shortest, UserChunks planRequesterChunks) {
+	private UserChunks cutCacho(int from, UserChunks shortest, UserChunks planRequesterChunks, boolean firstCacho) {
 		UserChunks result = new UserChunks(shortest.user);
+		int maxSize = firstCacho ? firstCachoSize : maxCachoSize;
 		
-		for(int i = from; i < maxCachoSize+from; i++){
+		for(int i = from; i < maxSize+from; i++){
 			if(planRequesterChunks.hasChunk(i)){
+				return result;
+			}
+			if(i>video.chunks.size()-1){
 				return result;
 			}
 			result.addChunk(new UserChunk(i));
@@ -68,6 +70,9 @@ public class CachoAjenoMaker {
 		for(UserChunks current : enCarrera) {
 			for(int i = from; i < maxCachoSize+from; i++){
 				if(!current.hasChunk(i)){
+					/*
+					 * no lo tiene porque no lo tiene o porque el anterior era el ultimo chunk del video???
+					 */
 					return winner;
 				} else {
 					winner = current;
