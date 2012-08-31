@@ -22,6 +22,8 @@ public class CachoPropioMaker {
 
 	public UserChunks makeCacho(int from, UserChunks planRequesterChunks) {
 		
+		play.Logger.info("CachoPropioMaker.makeCacho()");
+		
 		UserChunks uc = new UserChunks(planRequester);
 
 		for(int i = from; i<video.chunks.size();i++){

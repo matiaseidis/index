@@ -23,6 +23,8 @@ public class CachoAjenoMaker {
 	public UserChunks makeCacho(int from,
 			UserChunks planRequesterChunks,
 			List<UserChunks> noPlanRequesterChunks, boolean firstCacho) {
+		
+		play.Logger.info("CachoAjenoMaker.makeCacho()");
 
 		List<UserChunks> enCarrera = new ArrayList<UserChunks>();
 		

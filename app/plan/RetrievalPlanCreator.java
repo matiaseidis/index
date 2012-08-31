@@ -37,6 +37,8 @@ public class RetrievalPlanCreator {
 
 	public RetrievalPlan generateRetrievalPlan(){
 		
+		play.Logger.info("armando plan para "+planRequester.email+" - video: "+video.videoId+" * "+video.lenght);
+		
 		boolean firstCacho = true;
 
 		List<UserChunks> userChunks = new ArrayList<UserChunks>(video.userChunks);
@@ -82,7 +84,7 @@ public class RetrievalPlanCreator {
 					}
 				}
 				nextCacho = noRequesterShortestCacho;
-
+				play.Logger.info("next cacho -> chunks: %s - user: %s - lowerChunkPos: %s - higherChunkPos: %s", nextCacho.chunks.size(), nextCacho.user.email, nextCacho.lowerChunkPosition(), nextCacho.higherChunkPosition());
 			}
 			firstCacho = false;
 			result.add(nextCacho);
