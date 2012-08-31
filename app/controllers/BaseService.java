@@ -17,9 +17,9 @@ public class BaseService extends Controller {
 	}
 	
 	protected static void jsonOk(Object obj) {
-		String result = serializer.serialize(new Ok(obj));
+		String result = serializer.include("userCachos").serialize(obj);
 		play.Logger.info("result: %s", result);
-		renderJSON(serializer.serialize(obj));
+		renderJSON(serializer.include("userCachos").serialize(obj));
 	}
 	
 	protected static void jsonError(Object obj) {
