@@ -12,6 +12,7 @@ GET     /favicon.ico                            404
 GET     /public/                                staticDir:public
 
 POST	/videoService/unregisterChunks			VideoService.unregisterChunks
+#POST	/planService/getRetrievalPlan			PlanService.getRetrievalPlan
 
 # Import CRUD routes
 *      /admin              module:crud
