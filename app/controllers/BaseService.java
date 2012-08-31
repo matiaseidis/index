@@ -1,10 +1,10 @@
 package controllers;
 
+import play.Play;
+import play.mvc.Controller;
 import controllers.response.Ok;
 import controllers.response.TodoMal;
 import flexjson.JSONSerializer;
-import play.Play;
-import play.mvc.Controller;
 
 public class BaseService extends Controller {
 	

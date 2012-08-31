@@ -10,8 +10,6 @@ import net.sf.oval.constraint.NotNull;
 
 import org.apache.commons.collections.MapUtils;
 
-import play.Play;
-
 import controllers.response.TodoMal;
 
 public class ChunkService extends BaseService {
@@ -41,7 +39,7 @@ public class ChunkService extends BaseService {
 		
 		Map<Integer, String> chunkOrdinals = chunkOrdinalsForExistentVideo(video, chunks);
 		
-		if(MapUtils.isEmpty(chunkOrdinals)){
+		if(chunkOrdinals == null || chunkOrdinals.isEmpty()){
 			play.Logger.error("No chunks passed for register for video: "+videoId);
 			jsonError("No chunks passed for register for video: "+videoId);
 		}
@@ -85,7 +83,7 @@ public class ChunkService extends BaseService {
 		}
 		
 		Map<Integer, String> chunkOrdinals = chunkOrdinalsForExistentVideo(video, chunks);
-		if(MapUtils.isEmpty(chunkOrdinals)){
+		if(chunkOrdinals == null || chunkOrdinals.isEmpty()){
 			play.Logger.error("No chunks passed for unregister for video: "+videoId);
 			jsonError("No chunks passed for unregister for video: "+videoId);
 		}

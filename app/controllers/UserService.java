@@ -1,17 +1,10 @@
 package controllers;
 
-import javax.persistence.UniqueConstraint;
-
 import models.User;
 import net.sf.oval.constraint.NotNull;
 import play.data.validation.Email;
 import play.data.validation.IPv4Address;
 import play.data.validation.Min;
-import play.data.validation.Unique;
-import play.mvc.Controller;
-import controllers.response.Ok;
-import controllers.response.TodoMal;
-import flexjson.JSONSerializer;
 
 public class UserService extends BaseService {
 

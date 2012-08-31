@@ -3,8 +3,6 @@ package index;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import models.UserChunk;
 import models.UserChunks;

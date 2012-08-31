@@ -13,7 +13,6 @@ import models.User;
 import models.UserCacho;
 import models.UserChunk;
 import models.Video;
-import net.sf.oval.constraint.NotNull;
 
 import org.apache.commons.collections.Transformer;
 import org.junit.Assert;

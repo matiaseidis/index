@@ -32,7 +32,7 @@ public class SubsRepo {
 			result = langs.remove(lang) != null;
 		}
 
-		if ( MapUtils.isEmpty(langs) ) {
+		if ( langs == null || langs.isEmpty() ) {
 			repo.remove(peli);
 		}
 				

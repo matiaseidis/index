@@ -5,15 +5,11 @@ import java.util.Map;
 import junit.framework.Assert;
 import models.User;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import play.mvc.Http.Response;
-import play.test.Fixtures;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 
 public class UserCreationTest extends BaseFunctionalTest {

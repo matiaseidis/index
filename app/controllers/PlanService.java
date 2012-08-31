@@ -5,9 +5,6 @@ import models.User;
 import models.Video;
 import net.sf.oval.constraint.NotNull;
 import plan.RetrievalPlanCreator;
-import play.mvc.Controller;
-import controllers.response.Ok;
-import controllers.response.TodoMal;
 
 public class PlanService extends BaseService {
 

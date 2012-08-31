@@ -11,9 +11,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.gson.JsonObject;
-
-import play.Play;
 import play.mvc.Http.Response;
 import play.test.Fixtures;
 
