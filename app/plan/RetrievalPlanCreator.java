@@ -91,8 +91,13 @@ public class RetrievalPlanCreator {
 			firstCacho = false;
 			result.add(nextCacho);
 			if(nextCacho.hasChunk(video.chunks.size()-1)){
+				play.Logger.info("debug");
+				play.Logger.info("result %s",result);
+				
 				Set<UserChunks> mergedChunks = new SameUserChunksMerger().mergeChunks(result);
+				play.Logger.info("mergedChunks: %s", mergedChunks);
 				List<UserCacho> cachos = cachosFrom(mergedChunks, video);
+				play.Logger.info("cachos %s", cachos);
 				return retrievalPlanFor(video, cachos);
 			} 
 			i = nextCacho.higherChunkPosition();
@@ -135,6 +140,8 @@ public class RetrievalPlanCreator {
 
 	private RetrievalPlan retrievalPlanFor(Video video,
 			List<UserCacho> userCachos) {
+		play.Logger.info("cachos para plan: %s", userCachos);
+		
 		RetrievalPlan rp = new RetrievalPlan(video, userCachos); 
 		return rp;
 	}
