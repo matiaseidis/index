@@ -141,8 +141,12 @@ public class RetrievalPlanCreator {
 	private RetrievalPlan retrievalPlanFor(Video video,
 			List<UserCacho> userCachos) {
 		play.Logger.info("cachos para plan: %s", userCachos);
+		play.Logger.info("cachos para plan: %s", userCachos.size());
+		play.Logger.info("cachos para plan: %s", userCachos.get(0).getCacho().from);
+		play.Logger.info("cachos para plan: %s", userCachos.get(0).getCacho().lenght);
 		
 		RetrievalPlan rp = new RetrievalPlan(video, userCachos); 
+		play.Logger.info("plan: %s", rp.getUserCachos().get(0).getCacho().lenght);
 		return rp;
 	}
 
