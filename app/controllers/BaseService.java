@@ -17,11 +17,11 @@ public class BaseService extends Controller {
 	}
 	
 	protected static void jsonOk(Object obj) {
-		renderJSON(serializer.deepSerialize(new Ok(obj)));
+		renderJSON(serializer.serialize(new Ok(obj)));
 	}
 	
 	protected static void jsonError(Object obj) {
-		renderJSON(serializer.deepSerialize(new TodoMal(obj)));
+		renderJSON(serializer.serialize(new TodoMal(obj)));
 	}
 
 }
