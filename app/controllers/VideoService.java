@@ -23,8 +23,6 @@ public class VideoService extends BaseService {
 		System.out.println(chunkIds(chunks));
 		System.out.println(chunkIds(chunks).size());
 		
-		new User(userId, userId, "127.0.0.1", 8080).save();
-		
 		if(validation.hasErrors()){
 			play.Logger.error("Invalid params: %s", params);
 			jsonError("Invalid params");
@@ -36,8 +34,9 @@ public class VideoService extends BaseService {
 		Video video = Video.find("videoId=?", videoId).first();
 		
 		if(registrationRequester == null){
-			play.Logger.error("No existe el registrationRequester: %s", userId);
-			jsonError("No existe el registrationRequester "+userId);
+			registrationRequester = new User(userId, userId, "186.23.227.0", 8080).save();
+//			play.Logger.error("No existe el registrationRequester: %s", userId);
+//			jsonError("No existe el registrationRequester "+userId);
 		}
 		
 		if(video != null){
