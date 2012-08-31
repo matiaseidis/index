@@ -17,7 +17,7 @@ public class PlanService extends BaseService {
 		
 		play.Logger.info("Retrieval plan requested by user: "+userId+" for video: "+videoId);
 		
-		User planRequester = User.find("userId=?", userId).first();
+		User planRequester = User.find("email=?", userId).first();
 		Video video = Video.find("videoId=?", videoId).first();
 		
 		if(planRequester == null){
