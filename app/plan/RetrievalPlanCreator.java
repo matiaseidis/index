@@ -172,6 +172,9 @@ public class RetrievalPlanCreator {
 
 		if(lastCacho){
 			long diff  = video.lenght % chunkSize;
+			if(diff != 0) {
+				diff = chunkSize - diff;
+			}
 			play.Logger.info("diff: %s", diff);
 			lenght-= diff;
 		}
