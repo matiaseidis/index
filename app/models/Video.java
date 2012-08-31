@@ -32,9 +32,12 @@ public class Video extends Model{
 		this.lenght = lenght;
 		this.addedBy = user;
 
+		UserChunks uc = new UserChunks(user);
 		for (int i = 0; i< plainChunks.size(); i++) {
 			chunks.add(new VideoChunk(i, plainChunks.get(i)));
+			uc.addChunk(new UserChunk(i));
 		}
+		userChunks.add(uc);
 	}
 
 	@Override
