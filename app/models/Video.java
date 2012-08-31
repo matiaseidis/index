@@ -9,6 +9,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
 import play.db.jpa.Model;
+import controllers.BaseService;
 
 @Entity
 public class Video extends Model{
@@ -34,7 +35,7 @@ public class Video extends Model{
 
 		UserChunks uc = new UserChunks(user);
 		for (int i = 0; i< plainChunks.size(); i++) {
-			chunks.add(new VideoChunk(i, plainChunks.get(i)));
+			chunks.add(new VideoChunk(i, plainChunks.get(i).split(BaseService.CHUNK_SEPARATOR)[1]));
 			uc.addChunk(new UserChunk(i));
 		}
 		userChunks.add(uc);

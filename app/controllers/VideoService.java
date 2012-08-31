@@ -23,7 +23,7 @@ public class VideoService extends BaseService {
 		System.out.println(chunkIds(chunks));
 		System.out.println(chunkIds(chunks).size());
 		
-		
+		new User(userId, userId, "127.0.0.1", 8080).save();
 		
 		if(validation.hasErrors()){
 			play.Logger.error("Invalid params: %s", params);
@@ -61,7 +61,7 @@ public class VideoService extends BaseService {
 	
 
 	private static List<String> chunkIds(String chunks) {
-		return Arrays.asList(chunks.split(CHUNK_SEPARATOR));
+		return Arrays.asList(chunks.split(CHUNK_FOR_REGISTER_SEPARATOR));
 	}
 }
 
