@@ -163,15 +163,19 @@ public class RetrievalPlanCreator {
 
 		long from =  uc.chunks.get(0).position * chunkSize;
 		long lenght = uc.chunks.size() * chunkSize;
-
+		play.Logger.info("lenght: %s", lenght);
+		play.Logger.info("pos: %s", uc.chunks.get(uc.chunks.size()-1).position);
+		play.Logger.info("pos: %s", video.chunks.size()-1);
 		
 		//*TODO*/
 		boolean lastCacho = (uc.chunks.get(uc.chunks.size()-1).position) == video.chunks.size()-1;
 
 		if(lastCacho){
 			long diff  = video.lenght % chunkSize;
+			play.Logger.info("diff: %s", diff);
 			lenght-= diff;
 		}
+		play.Logger.info("lenght: %s", lenght);
 		Cacho cacho = new Cacho(from, lenght);
 
 		return cacho;
