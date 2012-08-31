@@ -44,6 +44,8 @@ public class RetrievalPlanCreator {
 		List<UserChunks> userChunks = new ArrayList<UserChunks>(video.userChunks);
 	
 		UserChunks planRequesterChunks = video.getChunksFrom(planRequester);
+		
+		play.Logger.info("plan requester chunks: %s", planRequesterChunks.chunks);
 
 		SortedSet<UserChunks> result = new TreeSet<UserChunks>(new ChunkPositionComparator());
 

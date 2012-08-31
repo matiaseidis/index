@@ -45,6 +45,9 @@ public class Video extends Model{
 	public UserChunks getChunksFrom(final User user) {
 		
 		for(UserChunks uc : this.userChunks){
+			
+			play.Logger.debug("comparing %s and %s", uc.user.email, user.email);
+			
 			if (uc.user.email.equals(user.email) ) {
 				return uc;
 			}
