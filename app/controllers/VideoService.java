@@ -20,6 +20,9 @@ public class VideoService extends BaseService {
 		System.out.println(userId);
 		System.out.println(5);
 		System.out.println(chunks);
+		System.out.println(chunkIds(chunks));
+		System.out.println(chunkIds(chunks).size());
+		
 		
 		
 		if(validation.hasErrors()){
