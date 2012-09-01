@@ -10,18 +10,6 @@ import net.sf.oval.constraint.NotNull;
 public class VideoService extends BaseService {
 	
 	public static void registerVideo(@NotNull String videoId, @NotNull  String fileName, @NotNull Long lenght, @NotNull String userId, @NotNull String chunks){
-		System.out.println(1);
-		System.out.println(videoId);
-		System.out.println(2);
-		System.out.println(fileName);
-		System.out.println(3);
-		System.out.println(lenght);
-		System.out.println(4);
-		System.out.println(userId);
-		System.out.println(5);
-		System.out.println(chunks);
-		System.out.println(chunkIds(chunks));
-		System.out.println(chunkIds(chunks).size());
 		
 		if(validation.hasErrors()){
 			play.Logger.error("Invalid params: %s", params);
