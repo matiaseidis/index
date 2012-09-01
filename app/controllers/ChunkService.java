@@ -105,7 +105,7 @@ public class ChunkService extends BaseService {
 		Map<Integer, String> result = new HashMap<Integer, String>();
 		
 		for(String chunk : chunks.split("\\"+CHUNK_FOR_REGISTER_SEPARATOR)){
-			String[] splittedChunk = chunk.split("!");
+			String[] splittedChunk = chunk.split(CHUNK_SEPARATOR);
 			int chunkOrdinal = Integer.parseInt(splittedChunk[0]);
 			String chunkId = splittedChunk[1];
 			

@@ -24,7 +24,7 @@ public class VideoServiceRegistrationTest extends BaseFunctionalTest {
 
 	@Test
 	public void createVideo(){
-		User user1 = new User("userId_1", "userId_1@gmail.com", "10.10.10.10", 1234);
+		User user1 = new User("userId_1", "userId_1@gmail.com", "10.10.10.10", 1234, 10002);
 		Assert.assertTrue(user1.create());
 		
 		
@@ -40,7 +40,7 @@ public class VideoServiceRegistrationTest extends BaseFunctionalTest {
 		
 		Response response = callService("/videoService/registerVideo", params);
 		
-		Assert.assertTrue( Video.count() == 1);
+		Assert.assertTrue( "Videos: "+Video.count(), Video.count() == 1);
 		
 		codeOk(response);
 		
@@ -48,9 +48,9 @@ public class VideoServiceRegistrationTest extends BaseFunctionalTest {
 		
 		Video video = Video.find("videoId=?", videoId).first();
 		
-		chunkOperation("register", user1, 0, 99, video);
+//		chunkOperation("register", user1, 0, video.chunks.size()-1, video);
 		
-		chunkOperation("unregister", user1, 0, 99, video);
+		chunkOperation("unregister", user1, 0, video.chunks.size()-1, video);
 		
 		video.delete();
 		
@@ -105,7 +105,7 @@ public class VideoServiceRegistrationTest extends BaseFunctionalTest {
 		for(int i = 0; i<chunks.size(); i++) {
 			sb.append(chunks.get(i) );
 			if(i != chunks.size()-1) {
-				sb.append(CHUNK_SEPARATOR);
+				sb.append(CHUNK_FOR_REGISTER_SEPARATOR);
 			}
 		}
 		

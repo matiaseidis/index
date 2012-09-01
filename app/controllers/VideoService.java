@@ -34,9 +34,9 @@ public class VideoService extends BaseService {
 		Video video = Video.find("videoId=?", videoId).first();
 		
 		if(registrationRequester == null){
-			registrationRequester = new User(userId, userId, "186.23.227.0", 8080).save();
-//			play.Logger.error("No existe el registrationRequester: %s", userId);
-//			jsonError("No existe el registrationRequester "+userId);
+//			registrationRequester = new User(userId, userId, "186.23.227.0", 8080,10002).save();
+			play.Logger.error("No existe el registrationRequester: %s", userId);
+			jsonError("No existe el registrationRequester "+userId);
 		}
 		
 		if(video != null){

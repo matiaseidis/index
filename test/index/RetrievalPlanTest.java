@@ -27,6 +27,8 @@ public class RetrievalPlanTest extends BaseFunctionalTest{
 	
 	String videoId = "test-video-id";
 	String fileName = "test-file-name";
+	
+	int dimonPort = 10002;
 
 	String chunkSeparator = Play.configuration.getProperty("chunk.separator");
 	String chunkForRegisterSeparator = Play.configuration.getProperty("chunk.registration.separator");
@@ -52,14 +54,19 @@ public class RetrievalPlanTest extends BaseFunctionalTest{
 		int totalChunks = primerCachoMaxSize + (usersWithCachos-1)*maxChunkAjenoSize + 1;
 		long vLenght = totalChunks*mega - mega/2;
 		
-		User register = createUser("register", "register@gmail.com", "10.10.10.1", 9999);
+		User register = createUser("register", "register@gmail.com", "10.10.10.1", 9999, dimonPort);
 		Video v = registerNewVideo(register, totalChunks, vLenght);
 		registerChunks(register, 0, totalChunks -1, v);
 
-		User pobreton = createUser("pobreton", "pobreton@gmail.com", "1.1.1.1", 9999);
+		User pobreton = createUser("pobreton", "pobreton@gmail.com", "1.1.1.1", 9999, dimonPort);
 		
 		for(int i = 1; i<usersWithCachos;i++) {
-			User u = createUser("userId_"+i, "userId_full_video_"+i+"@gmail.com", "10.10.10.1"+i, i);
+			
+			String uName = "userId_"+i;
+			String uEmail = "userId_full_video_"+i+"@gmail.com";
+			String uIp = "10.10.10.1"+i;
+			
+			User u = createUser(uName, uEmail, uIp, i, dimonPort);
 			registerChunks(u, 0, totalChunks -1, v);
 		}
 		
@@ -113,13 +120,14 @@ public class RetrievalPlanTest extends BaseFunctionalTest{
 		return size;
 	}
 
-	private User createUser(String userName, String email, String ip, int port) {
+	private User createUser(String userName, String email, String ip, int servlePort, int dimonPort) {
 		
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("name", userName);
 		params.put("email", email);
 		params.put("ip", ip);
-		params.put("port", Integer.toString(port));
+		params.put("servlePort", Integer.toString(servlePort));
+		params.put("dimonPort", Integer.toString(dimonPort));
 		
 		Response response = callService("/userService/create", params);
 		super.codeOk(response);

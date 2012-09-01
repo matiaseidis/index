@@ -9,7 +9,7 @@ import play.data.validation.Min;
 public class UserService extends BaseService {
 
 	public static void create(@NotNull String name, @NotNull @Email String email, 
-			@NotNull @IPv4Address String ip, @NotNull @Min(1) Integer port){ //POST
+			@NotNull @IPv4Address String ip, @NotNull @Min(1) Integer servlePort, @NotNull @Min(1) Integer dimonPort){ //POST
 
 		if(validation.hasErrors()){
 			play.Logger.error("Invalid params: %s", params);
@@ -26,7 +26,7 @@ public class UserService extends BaseService {
 		boolean userExists = User.find("email=? or ip=?", email, ip).first() != null;
 		if(!userExists){
 
-			User user = new User(name, email, ip, port);
+			User user = new User(name, email, ip, servlePort, dimonPort);
 			user.save();
 			play.Logger.info("usuario creado: "+name);
 			

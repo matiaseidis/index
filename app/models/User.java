@@ -19,15 +19,18 @@ public class User extends Model{
 	@Required @Unique @NotEmpty @IPv4Address
 	public String ip;
 	@Required
-	public int port;
+	public int servlePort;
+	@Required
+	public int dimonPort;
 	
 //	public Map<Video, List<Integer>> videoChunks = new HashMap<Video, List<Integer>>();
 	
-	public User(@Required String name, @Required String email, @Required String ip, @Required int port) {
+	public User(@Required String name, @Required String email, @Required String ip, @Required int servlePort, @Required int dimonPort) {
 		this.name = name;
 		this.email = email;
 		this.ip = ip;
-		this.port = port;
+		this.servlePort = servlePort;
+		this.dimonPort = dimonPort;
 	}
 	
 	@Override

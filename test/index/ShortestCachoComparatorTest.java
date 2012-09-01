@@ -20,9 +20,9 @@ public class ShortestCachoComparatorTest extends UnitTest {
 	public void testComparator() {
 		
 		ShortestCachoComparator comparator = new ShortestCachoComparator(0, 10);
-		
-		UserChunks uc1 = new UserChunks(new User("pepe", "p@p.com", "1.1.1.1", 123));
-		UserChunks uc2 = new UserChunks(new User("juan", "j@j.com", "2.2.2.2", 456));
+		 
+		UserChunks uc1 = new UserChunks(new User("pepe", "p@p.com", "1.1.1.1", 123, 10002));
+		UserChunks uc2 = new UserChunks(new User("juan", "j@j.com", "2.2.2.2", 456, 10002));
 		
 		for(int i = 0; i<10; i++) {
 			uc1.addChunk(new UserChunk(i));

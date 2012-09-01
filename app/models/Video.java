@@ -35,7 +35,7 @@ public class Video extends Model{
 
 		UserChunks uc = new UserChunks(user);
 		for (int i = 0; i< plainChunks.size(); i++) {
-			chunks.add(new VideoChunk(i, plainChunks.get(i).split(BaseService.CHUNK_SEPARATOR)[1]));
+			chunks.add(new VideoChunk(i, plainChunks.get(i)));
 			uc.addChunk(new UserChunk(i));
 		}
 		userChunks.add(uc);
@@ -62,19 +62,6 @@ public class Video extends Model{
 		this.userChunks.add(uc);
 		save();
 		return uc;
-
-//		List<UserChunks> uc = (List<UserChunks>) CollectionUtils.collect(this.userChunks, new Transformer(){
-//
-//			@Override
-//			public Object transform(Object arg0) {
-//				UserChunks userChunks = (UserChunks)arg0;
-//				return userChunks.user.email.equals(user.email);
-//			}});
-//
-//		return uc.isEmpty() ? new UserChunks(user) : uc.get(0);
-		
-//		return this.getChunksFrom(user) == null ? new UserChunks(user) : this.getChunksFrom(user);
-//		return this.userChunks.get(user) == null ? new UserChunks(user) : this.userChunks.get(user);
 	}
 
 
