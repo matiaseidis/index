@@ -16,19 +16,23 @@ public class BaseService extends Controller {
 	 * -
 	 */
 	public static final String CHUNK_FOR_REGISTER_SEPARATOR = Play.configuration.getProperty("chunk.registration.separator");
-	public static JSONSerializer serializer = new JSONSerializer();
+	
 	
 	static {
 		
 	}
 	
 	protected static void jsonOk(Object obj) {
-		String result = serializer.include("body.userCachos").serialize(new Ok(obj));
+		JSONSerializer serializer = new JSONSerializer();
+		serializer.include("body.userCachos");
+		serializer.include("body.video");
+		String result = serializer.serialize(new Ok(obj));
 		play.Logger.info("result: %s", result);
 		renderJSON(result);
 	}
 	
 	protected static void jsonError(Object obj) {
+		JSONSerializer serializer = new JSONSerializer();
 		renderJSON(serializer.serialize(new TodoMal(obj)));
 	}
 
