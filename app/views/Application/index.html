@@ -1,4 +1,18 @@
 #{extends 'main.html' /}
 #{set title:'Home' /}
 
-#{welcome /}
+#{list items:videos, as:'video'}
+
+	Video id: ${video.videoId}<br><br> 
+	Video fileName: ${video.fileName} <br><br>
+	Video lenght: ${video.lenght}<br><br>
+	Added by: ${video.addedBy.name}<br><br>
+	
+	UserCachos:<br><br>
+	#{list items:video.userCachos, as:'uc'}
+		${uc.user.name}<br><br>
+		#{list items:uc.cachos, as:'cacho'}
+		${cacho.start}<br><br>
+		${cacho.lenght}<br><br>
+	#{/list}
+#{/list}

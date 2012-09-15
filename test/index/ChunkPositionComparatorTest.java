@@ -5,13 +5,13 @@ import java.util.Collections;
 import java.util.List;
 
 import models.UserChunk;
-import models.UserChunks;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 import plan.ChunkPositionComparator;
 import play.test.UnitTest;
+import models.UserChunks;
 
 public class ChunkPositionComparatorTest extends UnitTest {
 	

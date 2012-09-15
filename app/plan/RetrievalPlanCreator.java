@@ -3,7 +3,6 @@ package plan;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -12,12 +11,7 @@ import models.RetrievalPlan;
 import models.User;
 import models.UserCacho;
 import models.UserCachos;
-import models.UserChunks;
 import models.Video;
-
-import org.apache.commons.collections.MapUtils;
-
-import play.Play;
 
 public class RetrievalPlanCreator {
 

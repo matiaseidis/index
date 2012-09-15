@@ -2,18 +2,12 @@ package models;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
-import org.hibernate.annotations.Sort;
-import org.hibernate.annotations.SortType;
-
-import plan.CachoPositionComparator;
 import play.db.jpa.Model;
 
 @Entity

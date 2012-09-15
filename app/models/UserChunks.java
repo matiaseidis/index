@@ -117,8 +117,5 @@ public class UserChunks extends Model{
 		return result;
 	}
 
-	
-	
-	
 
 }
