@@ -1,21 +1,42 @@
 package models;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
-public class UserCachos implements Serializable{
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+
+import org.hibernate.annotations.Sort;
+import org.hibernate.annotations.SortType;
+
+import plan.CachoPositionComparator;
+import play.db.jpa.Model;
+
+@Entity
+public class UserCachos extends Model{
 	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	private final String userId;
-	private final List<Cacho> cachos = new ArrayList<Cacho>();
+	@OneToOne
+	public User user;
+	@OneToMany(cascade=CascadeType.ALL)
+//	@OrderBy("from")
+//    @JoinTable(name = "USERCACHOS_CACHO", joinColumns = @JoinColumn(name = "CACHO_ID"), inverseJoinColumns = @JoinColumn(name = "USERCACHO_ID"))
+//	@Sort(type=SortType.COMPARATOR,comparator=CachoPositionComparator.class)
+	public List<Cacho> cachos = new ArrayList<Cacho>();
 	
-	public UserCachos(String usuario) {
-		this.userId = usuario;
+	
+//	public SortedSet<Cacho> cachos = new TreeSet<Cacho>(new CachoPositionComparator());
+	
+	public UserCachos(User user) {
+		this.user = user;
 	}
 	
 	public boolean addCacho(Cacho newCacho){
@@ -46,12 +67,14 @@ public class UserCachos implements Serializable{
 		return cachos.remove ( cacho );
 	}
 
-	public String getUserId() {
-		return userId;
+	public boolean addCachos(List<Cacho> cachosNuevos) {
+		
+		boolean added = false;
+		
+		for(Cacho cacho : cachosNuevos){
+			added = added ? true : this.addCacho(cacho);
+		}
+		
+		return added;
 	}
-
-	public List<Cacho> getCachos() {
-		return cachos;
-	}
-	
 }

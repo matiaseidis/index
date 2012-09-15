@@ -8,10 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import models.Cacho;
 import models.RetrievalPlan;
 import models.User;
 import models.UserCacho;
-import models.UserChunk;
+import models.UserCachos;
 import models.Video;
 
 import org.apache.commons.collections.Transformer;
@@ -30,6 +31,8 @@ public class RetrievalPlanTest extends BaseFunctionalTest{
 	
 	int dimonPort = 10002;
 
+	long chunkSize = Integer.valueOf(Play.configuration.getProperty("chunk.size"))*1024*1024; 
+	
 	String chunkSeparator = Play.configuration.getProperty("chunk.separator");
 	String chunkForRegisterSeparator = Play.configuration.getProperty("chunk.registration.separator");
 	int maxChunkAjenoSize = Integer.valueOf(Play.configuration.getProperty("max.cacho.size")); 
@@ -56,7 +59,7 @@ public class RetrievalPlanTest extends BaseFunctionalTest{
 		
 		User register = createUser("register", "register@gmail.com", "10.10.10.1", 9999, dimonPort);
 		Video v = registerNewVideo(register, totalChunks, vLenght);
-		registerChunks(register, 0, totalChunks -1, v);
+//		registerChunks(register, 0, totalChunks -1, v);
 
 		User pobreton = createUser("pobreton", "pobreton@gmail.com", "1.1.1.1", 9999, dimonPort);
 		
@@ -158,12 +161,21 @@ public class RetrievalPlanTest extends BaseFunctionalTest{
 		
 		video.refresh();
 		
+		List<Integer> ucList = new ArrayList<Integer>();
 		for(int i = from; i<=to; i++){
-			Assert.assertTrue("User ["+user.email+"] should have chunk: "+i,video.getChunksFrom(user).hasChunk(i));
+			ucList.add(i);
 		}
 		
-		List<UserChunk> chunks = video.getChunksFrom(user).chunks;
-		Assert.assertEquals(user.email, to+1, chunks.size()); // <to> is zero based
+		Cacho real =  video.getCachosFrom(user).cachos.get(0);
+		Cacho expected = video.getCachoFromChunks(ucList, video.getTotalChunks(), video.lenght);
+		
+		Assert.assertTrue(
+				"Video lenght: "+video.lenght+" - User ["+user.email+"] should have cacho from : "+from+" of "+(to-from)*chunkSize+
+				" but have "+real.start+" - "+real.lenght, 
+				real.equals(expected));
+		
+		UserCachos userCachos = video.getCachosFrom(user);
+		Assert.assertEquals(user.email, 1, userCachos.cachos.size()); // <to> is zero based
 	}
 	
 	private Video registerNewVideo(User user, int totalChunks, long lenght) {
@@ -180,7 +192,8 @@ public class RetrievalPlanTest extends BaseFunctionalTest{
 		Video video = new Video(videoId+random, fileName+random, lenght, chunks, user);
 		
 		Assert.assertTrue(video.create());
-		Assert.assertTrue(video.chunks.size() == totalChunks);
+		int vChunks = video.chunks.size();
+		Assert.assertTrue(vChunks == totalChunks);
 		return video;
 	}
 }

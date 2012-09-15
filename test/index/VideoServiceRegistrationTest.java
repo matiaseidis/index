@@ -11,11 +11,15 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import play.Play;
 import play.mvc.Http.Response;
 import play.test.Fixtures;
 
 
 public class VideoServiceRegistrationTest extends BaseFunctionalTest {
+	
+	int chunkSize = Integer.valueOf(Play.configuration.getProperty("chunk.size"))*1024*1024; 
+
 	
 	@Before
     public void setUp() {
@@ -30,13 +34,15 @@ public class VideoServiceRegistrationTest extends BaseFunctionalTest {
 		
 		
 		String videoId = "videoId";
+		int totalChunks = 401;
+		
 		
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("videoId", videoId);
 		params.put("fileName", "fileName");
-		params.put("lenght", Integer.toString(123456));
+		params.put("lenght", Integer.toString(totalChunks*1024*1024));
 		params.put("userId", user1.email);
-		params.put("chunks", videoChunks());
+		params.put("chunks", videoChunks(totalChunks));
 		
 		Response response = callService("/videoService/registerVideo", params);
 		
@@ -50,7 +56,13 @@ public class VideoServiceRegistrationTest extends BaseFunctionalTest {
 		
 //		chunkOperation("register", user1, 0, video.chunks.size()-1, video);
 		
-		chunkOperation("unregister", user1, 0, video.chunks.size()-1, video);
+//		response = callService("/chunkService/unregisterChunks", params);
+//		
+//		codeOk(response);
+//		
+//		Assert.assertEquals(1, Video.count());
+		
+		chunkOperation("unregister", user1, 0, video.getTotalChunks() -1 , video);
 		
 		video.delete();
 		
@@ -72,15 +84,25 @@ public class VideoServiceRegistrationTest extends BaseFunctionalTest {
 		
 		video.refresh();
 		
-		for(int i = from; i<=to; i++){
+		
 			if(action.equals("register")) {
-				Assert.assertTrue("there should be 100 chunks, instead of "+video.getChunksFrom(user).chunks.size(), video.getChunksFrom(user).chunks.size()==100);
-				Assert.assertTrue("User ["+user.email+"] should have chunk: "+i,video.getChunksFrom(user).hasChunk(i));
+				Assert.assertTrue("there should be un cacho", video.getCachosFrom(user).cachos.size() == 1);
+				Assert.assertTrue("there should be un cacho of "+from+" - "+to+", instead of "+video.getCachosFrom(user).cachos.get(0).lenght, video.getCachosFrom(user).cachos.get(0).lenght == (to-from)*chunkSize);
+				
 			} else {
-				Assert.assertTrue("there should be no chunks, instead of "+video.getChunksFrom(user).chunks.size(), video.getChunksFrom(user).chunks.size()==0);
-				Assert.assertFalse("User ["+user.email+"] should not have chunk: "+i,video.getChunksFrom(user).hasChunk(i));
+				Assert.assertTrue("there should be no chunks, instead of "+video.getCachosFrom(user).cachos.size(), video.getCachosFrom(user).cachos.size() == 0);
 			}
-		}
+		
+		
+//		for(int i = from; i<=to; i++){
+//			if(action.equals("register")) {
+//				Assert.assertTrue("there should be 100 chunks, instead of "+video.getCachosFrom(user).chunks.size(), video.getCachosFrom(user).chunks.size()==100);
+//				Assert.assertTrue("User ["+user.email+"] should have chunk: "+i,video.getCachosFrom(user).hasChunk(i));
+//			} else {
+//				Assert.assertTrue("there should be no chunks, instead of "+video.getCachosFrom(user).chunks.size(), video.getCachosFrom(user).chunks.size()==0);
+//				Assert.assertFalse("User ["+user.email+"] should not have chunk: "+i,video.getCachosFrom(user).hasChunk(i));
+//			}
+//		}
 	}
 	
 	private String chunks(int from, int to) {
@@ -92,9 +114,9 @@ public class VideoServiceRegistrationTest extends BaseFunctionalTest {
 		return sb.toString();
 	}
 
-	private String videoChunks() {
+	private String videoChunks(int total) {
 		List<String> chunks = new ArrayList<String>();
-		for(int i = 0; i<401; i++) {
+		for(int i = 0; i<total; i++) {
 			chunks.add(Integer.toString(i));
 		}
 		/*

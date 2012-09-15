@@ -2,16 +2,21 @@ package plan;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import models.Cacho;
 import models.RetrievalPlan;
 import models.User;
 import models.UserCacho;
+import models.UserCachos;
 import models.UserChunks;
 import models.Video;
+
+import org.apache.commons.collections.MapUtils;
+
 import play.Play;
 
 public class RetrievalPlanCreator {
@@ -19,168 +24,102 @@ public class RetrievalPlanCreator {
 	private final Video video;
 	private final User planRequester;
 	private final CachoPropioMaker cachoPropioMaker;
-	private final CachoAjenoMaker cachoAjenoMaker;
-
-	/*
-	 * TODO usar el maxCachoSize para limitar el tamaño de los cachos -> ¿va esto?
-	 */
-	private int maxCachoSize = Integer.valueOf(Play.configuration.getProperty("max.cacho.size")); 
-	private long chunkSize = Long.valueOf(Play.configuration.getProperty("chunk.size")) * 1024 * 1024;
+	private CachoAjenoMaker cachoAjenoMaker;
 
 	public RetrievalPlanCreator(Video video, User user) {
 		super();
 		this.video = video;
 		this.planRequester = user;
 		cachoPropioMaker = new CachoPropioMaker(user, video);
-		cachoAjenoMaker = new CachoAjenoMaker(video);
 	}
 
 	public RetrievalPlan generateRetrievalPlan(){
 		
 		play.Logger.info("armando plan para "+planRequester.email+" - video: "+video.videoId+" * "+video.lenght);
+		List<UserCachos> userCachos = new ArrayList<UserCachos>(video.userCachos);
 		
-		boolean firstCacho = true;
-
-		List<UserChunks> userChunks = new ArrayList<UserChunks>(video.userChunks);
-	
-		UserChunks planRequesterChunks = video.getChunksFrom(planRequester);
+		UserCachos planRequesterCachos = video.getCachosFrom(planRequester);
+		play.Logger.info("plan requester chunks: %s", planRequesterCachos.cachos);
 		
-		play.Logger.info("plan requester chunks: %s", planRequesterChunks.chunks);
-
-		SortedSet<UserChunks> result = new TreeSet<UserChunks>(new ChunkPositionComparator());
-
+		SortedMap<Long, UserCacho> result = new TreeMap<Long, UserCacho>();
+		List<UserCachos> noPlanRequesterCachos = noPlanRequesterCachos(userCachos);
 		
-		List<UserChunks> noPlanRequesterChunks = noPlanRequesterChunks(userChunks);
+		/*
+		 * ahora la estrategia cambia
+		 * 1 - agrego todos los cachos del requester al plan
+		 */
+		for(Cacho requesterCacho : planRequesterCachos.cachos){
+			result.put(requesterCacho.start, new UserCacho(planRequester, requesterCacho));
+		}
 		
-		List<UserChunks> removedNoRequesterChunks = new ArrayList<UserChunks>();
-		
-
-		for(int i = 0; i<video.chunks.size(); i++) {
+		/*
+		 * 2 - recorro los requesterCachos para ver que necesito del resto (los cachos que no tiene el requester)
+		 */
+		List<Cacho> cachosQueFaltan = new ArrayList<Cacho>();
+		if(result.isEmpty()){
 			/*
-			 * mientras el requester tenga este chunk, voy inflando un userChunks para el
+			 * si el requester no tiene nada, necesito el video entero
 			 */
-			UserChunks nextCacho = null;
-			if (planRequesterChunks.hasChunk(i)){
-				nextCacho = cachoPropioMaker.makeCacho(i, planRequesterChunks);
-				
-			} else {
-				/*
-				 * en cuento deja de tener, inflo uno para el que menos tenga a partir del current chunk 
-				 * o hasta que el requester vuelva a tener el chunk
-				 * 
-				 */
-				UserChunks noRequesterShortestCacho = cachoAjenoMaker.makeCacho(i, planRequesterChunks, noPlanRequesterChunks, firstCacho);
-				/*
-				 * round robin
-				 */
-				
-				removeFromNoRequesterUserChunks(noRequesterShortestCacho, noPlanRequesterChunks, removedNoRequesterChunks, i);
-				
-				if(noRequesterShortestCacho == null) {
+			cachosQueFaltan.add(new Cacho(0L, video.lenght));
+		} else {
+			
+			long last = 0;
+			for(Map.Entry<Long, UserCacho> entry : result.entrySet()){
+				if(entry.getKey().compareTo(last) != 0) {
 					/*
-					 * try again with excluded users
+					 * falta el siguiente cacho
 					 */
-					noRequesterShortestCacho = cachoAjenoMaker.makeCacho(i, planRequesterChunks, removedNoRequesterChunks, firstCacho);
-					if(noRequesterShortestCacho == null) {
-						return null;
-					}
+					cachosQueFaltan.add(new Cacho(last, entry.getKey()));
+					/*
+					 * actualizo last
+					 */
+					last += entry.getValue().getCacho().lenght; 
 				}
-				nextCacho = noRequesterShortestCacho;
-				play.Logger.info("next cacho -> chunks: %s - user: %s - lowerChunkPos: %s - higherChunkPos: %s", nextCacho.chunks.size(), nextCacho.user.email, nextCacho.lowerChunkPosition(), nextCacho.higherChunkPosition());
 			}
-			firstCacho = false;
-			result.add(nextCacho);
-			if(nextCacho.hasChunk(video.chunks.size()-1)){
-				play.Logger.info("debug");
-				play.Logger.info("result %s",result);
-				
-				Set<UserChunks> mergedChunks = new SameUserChunksMerger().mergeChunks(result);
-				play.Logger.info("mergedChunks: %s", mergedChunks);
-				List<UserCacho> cachos = cachosFrom(mergedChunks, video);
-				play.Logger.info("cachos %s", cachos);
-				return retrievalPlanFor(video, cachos);
-			} 
-			i = nextCacho.higherChunkPosition();
-		}
-		play.Logger.error("Unable to ellaborate retrieving plan for video %s for user %s - not enough sources available", video.videoId, planRequester.email);
-		return null;
-	}
-
-	private List<UserChunks> removeFromNoRequesterUserChunks(UserChunks noRequesterShortestCacho,
-			List<UserChunks> noPlanRequesterChunks, List<UserChunks> removedNoRequesterChunks, int from) {
-		
-		if(noRequesterShortestCacho == null){
-			return noPlanRequesterChunks;
-		}
-		
-
-//		List<UserChunks> toRemove = new ArrayList<UserChunks>();
-		for(UserChunks uc : noPlanRequesterChunks) {
-			if(uc.user.email.equals(noRequesterShortestCacho.user.email) && uc.hasChunk(from)) {
-				removedNoRequesterChunks.add(uc);
+			UserCacho ultimoRequesterCacho = result.get(result.lastKey());
+			long ultimoRequesterCachoLastByteIndex = ultimoRequesterCacho.getCacho().start+ultimoRequesterCacho.getCacho().lenght;
+			if(ultimoRequesterCachoLastByteIndex != video.lenght){
+				/*
+				 * el requester no tiene el ultimo cacho
+				 */
+				long cachoQueFaltaLenght = video.lenght - ultimoRequesterCachoLastByteIndex;
+				cachosQueFaltan.add(new Cacho(ultimoRequesterCachoLastByteIndex+1, cachoQueFaltaLenght));
 			}
 		}
-		noPlanRequesterChunks.removeAll(removedNoRequesterChunks);
 		
-		return removedNoRequesterChunks;
+		cachoAjenoMaker = new CachoAjenoMaker(video, cachosQueFaltan, noPlanRequesterCachos);
+		
+		/*
+		 * 3 - los recorro con el criterio de maximo tamaño y round robin
+		 */
+		if(cachoAjenoMaker.canMakeCachos()){
+			List<UserCacho> cachosAjenos = cachoAjenoMaker.getCachos();
+			
+			for(UserCacho uc : cachosAjenos){
+
+				result.put(uc.getCacho().start, uc);
+			}
+			
+			RetrievalPlan retrievalPlan = new RetrievalPlan(video, new ArrayList<UserCacho>(result.values()));
+			return retrievalPlan;
+		} else {
+			play.Logger.error("Unable to ellaborate retrieving plan for video %s for user %s - not enough sources available", video.videoId, planRequester.email);
+			return null;
+		}
+		
+		
 	}
 
-	private List<UserChunks> noPlanRequesterChunks(List<UserChunks> userChunks) {
+	private List<UserCachos> noPlanRequesterCachos(List<UserCachos> userChunks) {
 
-		List<UserChunks> result = new ArrayList<UserChunks>();
+		List<UserCachos> result = new ArrayList<UserCachos>();
 
-		for(UserChunks uc :  userChunks) {
+		for(UserCachos uc :  userChunks) {
 			if(!uc.user.email.equals(planRequester.email)) {
 				result.add(uc);
 			}
 		}
 
 		return result;
-	}
-
-	private RetrievalPlan retrievalPlanFor(Video video,
-			List<UserCacho> userCachos) {
-		play.Logger.info("cachos para plan: %s", userCachos);
-		play.Logger.info("cachos para plan: %s", userCachos.size());
-		play.Logger.info("cachos para plan: %s", userCachos.get(0).getCacho().from);
-		play.Logger.info("cachos para plan: %s", userCachos.get(0).getCacho().lenght);
-		
-		RetrievalPlan rp = new RetrievalPlan(video, userCachos); 
-		play.Logger.info("plan: %s", rp.getUserCachos().get(0).getCacho().lenght);
-		return rp;
-	}
-
-	private List<UserCacho> cachosFrom(Set<UserChunks> chunks, Video video) {
-
-		List<UserCacho> result = new ArrayList<UserCacho>();
-		for(UserChunks uc : chunks) {
-			result.add(new UserCacho(uc.user, cachoFromUserChunks(uc, video)));
-		}
-		return result;
-	}
-
-	private Cacho cachoFromUserChunks(UserChunks uc, Video video) {
-
-		long from =  uc.chunks.get(0).position * chunkSize;
-		long lenght = uc.chunks.size() * chunkSize;
-		play.Logger.info("lenght: %s", lenght);
-		play.Logger.info("pos: %s", uc.chunks.get(uc.chunks.size()-1).position);
-		play.Logger.info("pos: %s", video.chunks.size()-1);
-		
-		//*TODO*/
-		boolean lastCacho = (uc.chunks.get(uc.chunks.size()-1).position) == video.chunks.size()-1;
-
-		if(lastCacho){
-			long diff  = video.lenght % chunkSize;
-			if(diff != 0) {
-				diff = chunkSize - diff;
-			}
-			play.Logger.info("diff: %s", diff);
-			lenght-= diff;
-		}
-		play.Logger.info("lenght: %s", lenght);
-		Cacho cacho = new Cacho(from, lenght);
-
-		return cacho;
 	}
 }
