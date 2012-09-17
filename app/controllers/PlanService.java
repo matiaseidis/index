@@ -79,12 +79,12 @@ public class PlanService extends BaseService {
 		
 		RetrievalPlan plan = new RetrievalPlanCreator(video, planRequester).generateRetrievalPlan();
 		
-		play.Logger.info("pplan %s", plan.getUserCachos());
-		play.Logger.info("pplan %s", plan.getUserCachos().size());
-		
 		if(plan == null) {
 			jsonError("Unable to ellaborate retrieving plan for video "+video.videoId+" for user "+planRequester.email+" - not enough sources available");
 		} 
+		play.Logger.info("pplan %s", plan.getUserCachos());
+		play.Logger.info("pplan %s", plan.getUserCachos().size());
+		
 		play.Logger.info("Returning retrieval plan for video: " + videoId);
 //		jsonOk(plan);
 		renderJSON(new Ok(plan));
