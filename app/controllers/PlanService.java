@@ -84,7 +84,7 @@ public class PlanService extends BaseService {
 			jsonError("Unable to ellaborate retrieving plan for video "+video.videoId+" for user "+planRequester.email+" - not enough sources available");
 		} 
 		play.Logger.info("Returning retrieval plan for video: " + videoId);
-		jsonOk(plan);
+//		jsonOk(plan);
 		renderJSON(new Ok(plan));
 	}
 }
