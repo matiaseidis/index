@@ -42,6 +42,8 @@ public class Video extends Model{
 	//	public List<UserChunks> userChunks = new ArrayList<UserChunks>();
 	@OneToMany(cascade=CascadeType.ALL)
 	public List<UserCachos> userCachos = new ArrayList<UserCachos>();
+	
+	public Video(){}
 
 	public Video(String videoId, String fileName, long lenght, List<String> plainChunks, User user) {
 		this.fileName = fileName;
