@@ -8,6 +8,8 @@ import org.junit.Before;
 import org.junit.Ignore;
 
 import play.Play;
+import play.libs.WS;
+import play.libs.WS.HttpResponse;
 import play.mvc.After;
 import play.mvc.Http.Response;
 import play.test.Fixtures;
@@ -42,6 +44,24 @@ public class BaseFunctionalTest extends FunctionalTest {
 		assertIsOk(response);
 		assertContentType("application/json", response);
 		assertCharset("utf-8", response);
+
+		return response;
+	}
+	
+	protected HttpResponse callSiteService(String serviceUrl, Map<String, String> params) {
+
+		Map<String, String> headers = new HashMap<String, String>();
+		headers.put("Content-Type", "application/json");
+		
+		String siteUrlBase = Play.configuration.getProperty("site.services.url.base");
+		
+		HttpResponse response = WS.url(siteUrlBase+serviceUrl).setParameters(params).post();
+		
+//		Response response = POST(url, params);
+		
+		int status = response.getStatus();
+		assertTrue("status: "+status, status == 200);
+		assertEquals("application/json; charset=utf-8", response.getContentType());
 
 		return response;
 	}

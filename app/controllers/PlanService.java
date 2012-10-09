@@ -31,7 +31,6 @@ public class PlanService extends BaseService {
 		ucs.addCacho(cacho);
 		userCachos.add(ucs);
 		Video video = new Video();
-//		Video video = new Video("videoTest", "fileNameTest.mp4", 1000L, chunks, user);
 		video.videoId = "videoTest";
 		video.fileName = "fileNameTest.mp4";
 		video.lenght = 1000L;
@@ -43,14 +42,7 @@ public class PlanService extends BaseService {
 		ucList.add(uc);
 		RetrievalPlan rp = new RetrievalPlan(video, ucList);
 		
-//		jsonOk(rp);
-//		new Video(null, null, 0L, null, null)
-//		jsonOk(new RetrievalPlan(video, ucList));
-//		renderJSON(new RetrievalPlan(video, ucList));
 		renderJSON(new Ok(rp));
-
-		
-//		c
 	}
 
 	

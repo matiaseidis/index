@@ -7,6 +7,8 @@ import models.User;
 
 import org.junit.Test;
 
+import play.Play;
+import play.libs.WS.HttpResponse;
 import play.mvc.Http.Response;
 
 import com.google.gson.JsonObject;
@@ -42,6 +44,21 @@ public class UserCreationTest extends BaseFunctionalTest {
 		Assert.assertTrue(jsonObject.get("body").getAsJsonObject().get("ip").getAsString().equals(ip));
 		Assert.assertTrue(jsonObject.get("body").getAsJsonObject().get("servlePort").getAsInt() == servlePort);
 		Assert.assertTrue(jsonObject.get("body").getAsJsonObject().get("dimonPort").getAsInt() == dimonPort);
+		
+		Map<String, String> siteParams = new HashMap<String, String>();
+		siteParams.put("email", email);
+		siteParams.put("servlePort", Integer.toString(servlePort));
+		siteParams.put("name", userName);
+		String newUserServiceUrl = Play.configuration.getProperty("site.service.new.user");
+		HttpResponse siteResponse = callSiteService(newUserServiceUrl, siteParams);
+		Assert.assertTrue(siteResponse.getJson().getAsJsonObject().get("code").getAsString().equalsIgnoreCase("ok"));
+		
+		String checkUserServiceUrl = Play.configuration.getProperty("site.service.get.user");
+		
+		siteResponse = callSiteService(checkUserServiceUrl, siteParams);
+		String code = siteResponse.getJson().getAsJsonObject().get("code").getAsString();
+		Assert.assertTrue("Code not ok", code.equalsIgnoreCase("ok"));
+		
 		
 	}
 }

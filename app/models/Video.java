@@ -29,8 +29,6 @@ public class Video extends Model{
 	 */
 	@ElementCollection
 	public Map<Integer, String> chunks = new HashMap<Integer, String>();
-	//	@OneToMany(cascade=CascadeType.ALL)
-	//	public List<VideoChunk> chunks = new ArrayList<VideoChunk>();
 
 	@ManyToOne
 	public User addedBy;
@@ -38,11 +36,9 @@ public class Video extends Model{
 	/**
 	 * Esto pasa a ser una lista de UserCachos
 	 */
-	//	@OneToMany(cascade=CascadeType.ALL)
-	//	public List<UserChunks> userChunks = new ArrayList<UserChunks>();
 	@OneToMany(cascade=CascadeType.ALL)
 	public List<UserCachos> userCachos = new ArrayList<UserCachos>();
-	
+
 	public Video(){}
 
 	public Video(String videoId, String fileName, long lenght, List<String> plainChunks, User user) {
@@ -51,13 +47,11 @@ public class Video extends Model{
 		this.lenght = lenght;
 		this.addedBy = user;
 
-		//		UserChunks uc = new UserChunks(user);
 		UserCachos uc = new UserCachos(user);
 		uc.addCacho(new Cacho(0L,lenght));
 
 		for (int i = 0; i< plainChunks.size(); i++) {
 			chunks.put(i, plainChunks.get(i));
-			//			uc.addChunk(new UserChunk(i));
 		}
 		userCachos.add(uc);
 	}
@@ -67,12 +61,10 @@ public class Video extends Model{
 		return videoId;
 	}
 
-	//	public UserChunks getChunksFrom(final User user) {
 	public UserCachos getCachosFrom(final User user) {
 
 		play.Logger.info("Video.getChunksFrom() "+user+" - "+this.userCachos+" - "+this.userCachos.size());
 
-		//		for(UserChunks uc : this.userCachos){
 		for(UserCachos uc : this.userCachos){
 
 			play.Logger.debug("comparing %s and %s", uc.user.email, user.email);
@@ -81,7 +73,6 @@ public class Video extends Model{
 				return uc;
 			}
 		}
-		//		UserChunks uc = new UserChunks(user);
 		/*
 		 * si no lo tiene, lo creo y lo devuelvo
 		 */
@@ -101,9 +92,6 @@ public class Video extends Model{
 
 
 		//TODO soporte para registrar mas de un cacho por llamada
-		//		List<Cacho> cachosNuevos = this.getCachosFromChunks(ucList, this.getTotalChunks(), this.lenght);
-		//		someAdded = cachos.addCachos(cachosNuevos);
-
 
 		Cacho cachoNuevo = this.getCachoFromChunks(ucList, this.getTotalChunks(), this.lenght);
 
@@ -186,6 +174,23 @@ public class Video extends Model{
 	public int getTotalChunks(){
 		int total = this.chunks.size();
 		return total;
+	}
+
+	public boolean registerFullVideoFor(User user) {
+		UserCachos userCachos = this.getCachosFrom(user);
+
+		if(userCachos.cachos.size() > 1 && userCachos.cachos.get(0).lenght != this.lenght){
+
+			/*
+			 * estoy registrando todo el video, asi que booro los cachos que tenia previamente   
+			 */
+			userCachos.cachos.clear();
+			userCachos.cachos.add(new Cacho(0L, this.lenght));
+			play.Logger.info("se registro todo el video %s - %s para el usuario %s", this.videoId, this.fileName, user.name);
+			return true;
+		}
+		play.Logger.info("El video %s - %s ya esta registrado para el usuario %s", this.videoId, this.fileName, user.name);
+		return false;
 	}
 
 

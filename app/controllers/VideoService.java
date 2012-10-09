@@ -3,6 +3,10 @@ package controllers;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
+
+import utils.SiteNotifier;
+
 import models.User;
 import models.Video;
 import net.sf.oval.constraint.NotNull;
@@ -18,18 +22,21 @@ public class VideoService extends BaseService {
 		
 		play.Logger.info("Video registration requested by user: "+userId+" for video: "+videoId);
 		
-		User registrationRequester = User.find("email=?", userId).first();
-		Video video = Video.find("videoId=?", videoId).first();
+		User registrationRequester = User.find("email", userId).first();
+		Video video = Video.find("videoId", videoId).first();
 		
 		if(registrationRequester == null){
-//			registrationRequester = new User(userId, userId, "186.23.227.0", 8080,10002).save();
 			play.Logger.error("No existe el registrationRequester: %s", userId);
 			jsonError("No existe el registrationRequester "+userId);
 		}
 		
 		if(video != null){
 			play.Logger.error("El video que se quiere registrar ya existe en el indice: %s", videoId);
-			jsonError("El video que se quiere registrar ya existe en el indice: "+videoId);
+			String extraInfo = " ya existia para el requester. No se hace nada";
+			if(video.registerFullVideoFor(registrationRequester) ) {
+				extraInfo = "se registro para el requester";
+			}
+			jsonOk("El video "+videoId+" que se quiere registrar ya existe en el indice - "+extraInfo);
 		}
 		
 		video = new Video(videoId, fileName, lenght, chunkIds(chunks), registrationRequester);
@@ -37,6 +44,9 @@ public class VideoService extends BaseService {
 		try{
 			video = video.save();
 			play.Logger.info("Se registro el video <id: "+videoId+"><fileName: "+fileName+"> en el indice");
+			
+			new SiteNotifier().notifyNewVideo(video);
+			
 			jsonOk("Se registro el video <id: "+videoId+"><fileName: "+fileName+"> en el indice");
 		} catch(Exception e) {
 			play.Logger.error("No se pudo registrar el video <id: "+videoId+"><fileName: "+fileName+"> en el indice");

@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import play.Play;
+import play.libs.WS.HttpResponse;
 import play.mvc.Http.Response;
 import play.test.Fixtures;
 
@@ -29,13 +30,13 @@ public class VideoServiceRegistrationTest extends BaseFunctionalTest {
 	@Test
 	public void createVideo(){
 		User user1 = new User("userId_1", "userId_1@gmail.com", "10.10.10.10", 1234, 10002);
+		
+		createUserOnSite(user1);
+		
 		Assert.assertTrue(user1.create());
 		
-		
-		
-		String videoId = "videoId";
+		String videoId = "videoId-test";
 		int totalChunks = 401;
-		
 		
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("videoId", videoId);
@@ -51,17 +52,20 @@ public class VideoServiceRegistrationTest extends BaseFunctionalTest {
 		codeOk(response);
 		
 		Assert.assertEquals(1, Video.count());
+
+		/*
+		 * creamos el video en el site 
+		 */
+		params.put("sharedByEmail", user1.email);
+		HttpResponse siteResponse = callSiteService(Play.configuration.getProperty("site.service.new.video"), params);
+		play.Logger.info("%s",siteResponse.getJson());
+		Assert.assertTrue(siteResponse.getJson().getAsJsonObject().get("code").getAsString().equalsIgnoreCase("ok"));
+		siteResponse = callSiteService(Play.configuration.getProperty("site.service.get.video"), params);
+		String code = siteResponse.getJson().getAsJsonObject().get("code").getAsString();
+		Assert.assertTrue("Code not ok", code.equalsIgnoreCase("ok"));
 		
 		Video video = Video.find("videoId=?", videoId).first();
-		
-//		chunkOperation("register", user1, 0, video.chunks.size()-1, video);
-		
-//		response = callService("/chunkService/unregisterChunks", params);
-//		
-//		codeOk(response);
-//		
-//		Assert.assertEquals(1, Video.count());
-		
+
 		chunkOperation("unregister", user1, 0, video.getTotalChunks() -1 , video);
 		
 		video.delete();
@@ -69,6 +73,24 @@ public class VideoServiceRegistrationTest extends BaseFunctionalTest {
 		Assert.assertEquals("No deberia haber videos", 0, Video.count());
 	}
 	
+	private void createUserOnSite(User user) {
+		
+		Map<String, String> siteParams = new HashMap<String, String>();
+		siteParams.put("email", user.email);
+		siteParams.put("servlePort", Integer.toString(user.servlePort));
+		siteParams.put("name", user.name);
+		String newUserServiceUrl = Play.configuration.getProperty("site.service.new.user");
+		HttpResponse siteResponse = callSiteService(newUserServiceUrl, siteParams);
+		Assert.assertTrue(siteResponse.getJson().getAsJsonObject().get("code").getAsString().equalsIgnoreCase("ok"));
+		
+		String checkUserServiceUrl = Play.configuration.getProperty("site.service.get.user");
+		
+		siteResponse = callSiteService(checkUserServiceUrl, siteParams);
+		String code = siteResponse.getJson().getAsJsonObject().get("code").getAsString();
+		Assert.assertTrue("Code not ok", code.equalsIgnoreCase("ok"));
+		
+	}
+
 	private void chunkOperation(String action, User user, int from, int to, Video video) {
 
 		String chunksForRegisterByUser = chunks(from, to);
