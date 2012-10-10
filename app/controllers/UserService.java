@@ -7,6 +7,7 @@ import play.data.validation.IPv4Address;
 import play.data.validation.Min;
 import utils.SiteNotifier;
 import controllers.response.Ok;
+import controllers.response.TodoMal;
 
 public class UserService extends BaseService {
 
@@ -15,12 +16,13 @@ public class UserService extends BaseService {
 			@NotNull @Min(1) Integer servlePort,
 			@NotNull @Min(1) Integer dimonPort) { // POST
 
-		if (validation.hasErrors()) {
+		if (!validation.errors().isEmpty()) {
 			play.Logger.error("Invalid params: %s", params);
 			for (play.data.validation.Error error : validation.errors()) {
 				play.Logger.warn(error.getKey() + " - " + error.message());
 			}
-			renderJSON(new Error("Invalid params"));
+			renderJSON(new TodoMal("Invalid params"));
+			return;
 			// jsonError("Invalid params");
 		}
 
@@ -37,12 +39,13 @@ public class UserService extends BaseService {
 
 			// jsonOk(user);
 			renderJSON(new Ok(user));
+			return;
 
 		} else {
-			play.Logger.error("Error intentando crear usuario: %s. params: %s",
+			play.Logger.error("Error intentando crear usuario ya registrado: %s. params: %s",
 					name, params);
 //			jsonError("el usuario " + name + " ya esta registrado");
-			renderJSON(new Error("el usuario " + name + " ya esta registrado"));
+			renderJSON(new TodoMal("el usuario " + name + " ya esta registrado"));
 		}
 	}
 }
