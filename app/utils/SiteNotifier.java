@@ -28,7 +28,7 @@ public class SiteNotifier {
 		params.put("email", user.email);
 		params.put("servlePort", Integer.toString(user.servlePort));
 		params.put("name", user.name);
-
+		play.Logger.info("about to notify new user to site at %s", SITE_NEW_USER_SERVICE);
 		WSRequest request = WS.url(SITE_NEW_USER_SERVICE);
 		request.setParameters(params);
 		HttpResponse response = request.post();
@@ -37,8 +37,8 @@ public class SiteNotifier {
 					user.email);
 		} else {
 			// TODO queue for retry
-			play.Logger.info("unable to notify new user %s - %s to site",
-					user.name, user.email);
+			play.Logger.info("unable to notify new user %s - %s to site - response code: %s - &s",
+					user.name, user.email, response.getStatus(), response.getString());
 		}
 
 	}
