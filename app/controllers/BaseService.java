@@ -9,19 +9,8 @@ import flexjson.JSONSerializer;
 
 public class BaseService extends Controller {
 	
-	/*
-	 * _
-	 */
 	public static final String CHUNK_SEPARATOR = Play.configuration.getProperty("chunk.separator");
-	/*
-	 * -
-	 */
 	public static final String CHUNK_FOR_REGISTER_SEPARATOR = Play.configuration.getProperty("chunk.registration.separator");
-	
-	
-	static {
-		
-	}
 	
 	protected static void jsonOk(Object obj) {
 		JSONSerializer serializer = new JSONSerializer();
@@ -29,15 +18,16 @@ public class BaseService extends Controller {
 		serializer.include("body.video");
 		serializer.exclude("body.class");
 		serializer.exclude("body.video.chunks");
-//		serializer.exclude("body.video.dimonPort");
-//		serializer.exclude("body.video.servlePort");
-		try{
+
+		try {
 			
 			Object serial = serializer.deepSerialize(obj);
 			String result = serial.toString();
 			play.Logger.info("result: %s", result);
 			renderJSON(new Ok(result));
-		} catch(Exception e){
+		
+		} catch(Exception e) {
+		
 			play.Logger.error(e, "TODO MAL");
 			renderJSON(new Error(e));
 		}

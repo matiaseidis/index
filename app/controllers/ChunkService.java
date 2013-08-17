@@ -41,8 +41,6 @@ public class ChunkService extends BaseService {
 			jsonError("No chunks passed for register for video: "+videoId);
 		}
 
-//		List<Integer> validChunksOrdinals = validChunks(video, chunkOrdinals);
-
 		play.Logger.info("registering chunks "+chunkOrdinals+" for video "+videoId+" by user " + userId);
 
 		try {
@@ -58,19 +56,6 @@ public class ChunkService extends BaseService {
 
 		jsonOk(chunkOrdinals);
 	}
-
-//	private static List<Integer> validChunks(Video video, Map<Integer, String> chunkOrdinals) {
-//
-//		List<Integer> validChunks = new ArrayList<Integer>();
-//
-//		for(Map.Entry<Integer, String> chunkToValidate : chunkOrdinals.entrySet()) {
-//			int chunkOrdinal = chunkToValidate.getKey();
-//			if(video.chunks.get(chunkOrdinal).equals(chunkToValidate.getValue())){
-//				validChunks.add(chunkOrdinal);
-//			}
-//		}
-//		return validChunks;
-//	}
 
 	public static void unregisterChunks(@NotNull String videoId, @NotNull String userId, @NotNull String chunks) {
 

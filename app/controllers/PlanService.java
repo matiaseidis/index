@@ -78,7 +78,7 @@ public class PlanService extends BaseService {
 		play.Logger.info("pplan %s", plan.getUserCachos().size());
 		
 		play.Logger.info("Returning retrieval plan for video: " + videoId);
-//		jsonOk(plan);
+
 		renderJSON(new Ok(plan));
 	}
 }

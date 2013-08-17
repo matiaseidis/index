@@ -23,7 +23,6 @@ public class UserService extends BaseService {
 			}
 			renderJSON(new TodoMal("Invalid params"));
 			return;
-			// jsonError("Invalid params");
 		}
 
 		play.Logger.info("registrando usuario " + name);
@@ -37,14 +36,12 @@ public class UserService extends BaseService {
 
 			new SiteNotifier().notifyNewUser(user);
 
-			// jsonOk(user);
 			renderJSON(new Ok(user));
 			return;
 
 		} else {
 			play.Logger.error("Error intentando crear usuario ya registrado: %s. params: %s",
 					name, params);
-//			jsonError("el usuario " + name + " ya esta registrado");
 			renderJSON(new TodoMal("el usuario " + name + " ya esta registrado"));
 		}
 	}
