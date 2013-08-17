@@ -134,7 +134,6 @@ public class CachoAjenoMaker {
 			return true;
 		}
 		return false;
-
 	}
 
 	private UserCacho cutCacho(Cacho cacho, UserCacho cachoCandidato) {
