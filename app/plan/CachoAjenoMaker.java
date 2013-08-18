@@ -94,28 +94,18 @@ public class CachoAjenoMaker {
 
 
 		while(otroCachoNeeded(currentCachoTarget, lastAdded) ) {
-
-			if(cachosCandidatos.size() == 1){
-				// le pido el cacho al mismo Pir porque no hay mas
-				UserCacho userCacho = cachosCandidatos.get(0);
-				UserCacho uc = cutCacho(currentCachoTarget, userCacho);
-				result.add(uc);
-				lastAdded = uc;
-
-			} else {
-
+			
 				for(UserCacho userCacho : cachosCandidatos){
 					UserCacho uc = cutCacho(currentCachoTarget, userCacho);
 					result.add(uc);
 					lastAdded = uc;
 
-					if(!otroCachoNeeded(currentCachoTarget, lastAdded)){
+					if(cachosCandidatos.size() > 1 && !otroCachoNeeded(currentCachoTarget, lastAdded)){
 						break;
 					}
 				}
-			}
-
 		}
+
 		return result;
 	}
 
